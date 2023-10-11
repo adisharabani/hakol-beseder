@@ -8,6 +8,7 @@ from datetime import datetime
 import uuid
 import os
 
+
 from myApp import app
 
 # Configure the SQLite database

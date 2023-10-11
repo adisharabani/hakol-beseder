@@ -5,7 +5,6 @@ from myApp import app
 import logging
 
 
-
 def getCurrentUser():
     if "user-id" in session:
         return User.query.get(str(session["user-id"]))
@@ -22,6 +21,16 @@ def createUser(phone_number):
     session["user-id"] = user.id
     return user
 
+def myRedirect(endpoint, query=None):
+    url = url_for(endpoint)
+    if url.startswith("http:") and not url.startswith("http://localhost") and not url.startswith("http://1") and not url.startswith("http://imac"):
+        url = url.replace("http:","https:")
+    if query:
+        return redirect(f"{url}?query")
+    else:
+        return redirect(url)
+
+
 @app.route("/test")
 def test():
     return "TEST"
@@ -30,7 +39,7 @@ def test():
 def logout():
     if ("user-id" in session):
         del session["user-id"]
-    return login()
+    return myRedirect("login")
  
 
 @app.route('/login', methods=["GET","POST"])
@@ -50,12 +59,14 @@ def login():
         createUser(phone_number)
         #show group if this came from a group invite
         if "pending-group-id" in session:
-            return group()
+            group_id = session["pending-group-id"]
+            del session["pending-group-id"]
+            return myRedirect("group", f"id={group_id}")
         else:
-            return main()
+            return myRedirect("main")
 
     return render_template("login.html", phone_number=phone_number, verification_code = verification_code)
-
+ 
 
 @app.route('/')
 def main():
@@ -72,8 +83,6 @@ def group():
     if user is None: 
         session["pending-group-id"] = group_id
         return login()
-    elif "pending-group-id" in session:
-        del session["pending-group-id"]
 
     group = Group.query.get(group_id)
     return render_template("group.html",user=user, group=group)
@@ -89,7 +98,7 @@ def groupAdd():
     group.users.append(user)
     db.session.add(group)
     db.session.commit()
-    return redirect(f"{'/'.join(request.path.split('/')[:-1])}?id={group.id}")
+    return myRedirect("group", f"id={group.id}")
 
 if __name__ == '__main__':
     app.run()
