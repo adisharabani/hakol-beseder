@@ -13,7 +13,7 @@ from myApp import app
 
 # Configure the SQLite database
 dbname = "mydatabase.db"
-should_create = not os.path.exists(f"instances/{dbname}")
+should_create = "RECREATE_DB" in os.environ
 
 app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{dbname}'
 db = SQLAlchemy(app)
