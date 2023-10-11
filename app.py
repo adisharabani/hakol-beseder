@@ -35,6 +35,11 @@ def myRedirect(endpoint, query=None):
 def test():
     return "TEST"
 
+@app.route("/createdb")
+def createDB():
+    # with app.app_context():
+        db.create_all()
+
 @app.route("/logout")
 def logout():
     if ("user-id" in session):

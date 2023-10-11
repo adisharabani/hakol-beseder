@@ -13,10 +13,11 @@ import os
 from myApp import app
 
 # Configure the SQLite database
-dbname = "mydatabase.db"
-should_create = "RECREATE_DB" in os.environ
+# dbname = "mydatabase.db"
+# should_create = "RECREATE_DB" in os.environ
 
-app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{dbname}'
+#app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{dbname}'
+
 db = SQLAlchemy(app)
 
 # Define a User model
@@ -63,6 +64,6 @@ class GroupViewers(db.Model):
     user_id = db.Column(db.String(36), db.ForeignKey('user.id'), nullable=False)
 
 
-if should_create:
-	with app.app_context():
-		db.create_all()
+# if should_create:
+# 	with app.app_context():
+# 		db.create_all()
