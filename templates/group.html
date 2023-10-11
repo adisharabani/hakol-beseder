@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/css/styles.css"> <!-- Link to your CSS file for styling -->
+    <title>Group Details</title>
+</head>
+<body>
+    <div class="group-container">
+        <h1>Group Name: {{ group.group_name }}</h1>
+        <h2>Users in the Group:</h2>
+        <ul class="user-list">
+            {% for user in group.users %}
+                <li class="user-item">
+                    <div class="user-info">
+                        <h3>{{ user.name }}</h3>
+                        <p>Phone Number: {{ user.phone_number }}</p>
+                        <p>Status: {{ user.status }}</p>
+                        <p>Timestamp: {{ user.last_seen }}</p>
+                    </div>
+                    {% if user.is_admin %}
+                        <span class="admin-badge">Admin</span>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+</html>

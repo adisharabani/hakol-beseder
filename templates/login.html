@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/css/styles.css">
+    <title>Login</title>
+</head>
+<body>
+    <div class="container">
+      {%if not phone_number %}
+        <h1>Enter Your Phone Number</h1>
+        <form action="login" method="POST">
+            <label for="phone_number">Phone Number:{{ phone_number }}</label>
+            <input type="tel" id="phone_number" name="phone_number" placeholder="לדוגמא 0544-000-000" required>
+            <button type="submit">Submit</button>
+        </form>
+      {%else%}
+        <h1>Enter Verification Code</h1>
+        <form action="login" method="POST">
+            <div class="verification-code-container">
+                <input type="hidden" value="{{ phone_number }}" name="phone_number" id="phone_number" />
+                <input type="number" inputmode="numeric" pattern="[0-9]*" id="verification_code" name="verification_code" class="verification-code" maxlength="4" required>
+            </div>
+            <button type="submit">Submit</button>
+        </form>
+      {%endif%}
+
+    </div>
+</body>
+</html>
+

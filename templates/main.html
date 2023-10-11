@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="static/css/styles.css">
+    <title>Main</title>
+</head>
+<body>
+    <div class="container">
+        <div class="profile">
+            <h1>Edit Profile</h1>
+            <p>Name: <input type="text" id="name" value="{{ user.name }}" /></p>
+            <p>Phone number: {{ user.phone_number }}</p>
+        </div>
+        <div class="groups">
+            <h2>My Groups</h2>
+            {% for group in user.groups %}
+                <div class="group-item">
+                    <span>{{ group.name }}</span>
+                    <span>({{ group.num_users }} users)</span>
+                </div>
+            {% endfor %}
+        </div>
+        <div class="buttons">
+            <a href="group/add" class="button">Add Group +</a>
+            <a href="#" onclick="alert('share')" class="button">Share with Your Friends</a>
+        </div>
+    </div>
+</body>
