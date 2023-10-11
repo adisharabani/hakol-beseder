@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import UUID
 
+
 from sqlalchemy import JSON
 from sqlalchemy.orm import relationship
 
