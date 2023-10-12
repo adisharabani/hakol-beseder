@@ -113,7 +113,7 @@
                 <span class=group-name>הי </span>
                 <input type="text" id="name" class=group-name value="{{ user.name or '' }}" placeholder="עדכן את שמך" onchange="updateUserName(this.value)"/>
             </div>
-            {% if (user.groups or user.friends) and (current_time - user.last_seen).total_seconds() >= 300 %}
+            {% if (user.groups or user.friends) and (current_time - user.last_seen).total_seconds() >= 3 %}
                 <div class="status">
                     <span class=group-name>הכל בסדר?</span>
                     <div class="thumbs">
@@ -156,7 +156,7 @@
                         {% endfor %}
                     </ul>
                     <button class="button" onclick="toggleGroupDetails('{{ group.id }}')">הקטן</button>
-                    <button class="button" onclick="shareGroup('{{ group.id }}')">צרף חברים לקבוצה</button>
+                    <button class="button" onclick="shareGroup('{{ group.id }}')">צרף חברים</button>
                     <button class="button" onclick="leaveGroup('{{ group.id }}')">צא מהקבוצה</button>
                 </div>
             {% endfor %}
@@ -170,9 +170,9 @@
 
             <!-- Other content goes here -->
             <div class="buttons">
-                <button class="button" onclick="document.location.href = 'group/add'">הוסף קבוצה</button>
-                <button class="button" onclick="addFriend();return false;" >הוסף חברים</button>
-                <button class="button" onclick="alert('share')" class="button">ספר לאחרים על האפליקציה</button>
+                <button class="button" onclick="document.location.href = 'group/add'">+ קבוצה</button>
+                <button class="button" onclick="addFriend();return false;" >+ חברים</button>
+                <button class="button" onclick="alert('share')" class="button">ספר לאחרים</button>
             </div>
             {% endif %}
 

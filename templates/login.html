@@ -8,24 +8,29 @@
 </head>
 <body>
     <div class="container">
+      <div class="groups">
+         <div>
       {%if not phone_number %}
-        <h1>Enter Your Phone Number</h1>
+         <h1 style='text-align:center'>💬👌<h1>
+        <h1>היי, מה מספר הטלפון שלך?</h1>
         <form action="login" method="POST">
-            <label for="phone_number">Phone Number:{{ phone_number }}</label>
-            <input type="tel" id="phone_number" name="phone_number" placeholder="לדוגמא 0544-000-000" required>
-            <button type="submit">Submit</button>
+            <input type="tel" id="phone_number" name="phone_number" placeholder="מספר טלפון" required>
+            <button type="submit">המשך</button>
         </form>
       {%else%}
-        <h1>Enter Verification Code</h1>
+        <h1>מה מספר האימות שקיבלת?</h1>
         <form action="login" method="POST">
             <div class="verification-code-container">
                 <input type="hidden" value="{{ phone_number }}" name="phone_number" id="phone_number" />
-                <input type="number" inputmode="numeric" pattern="[0-9]*" id="verification_code" name="verification_code" class="verification-code" maxlength="4" required>
+                <input type="text" inputmode="numeric" pattern="[0-9]*" id="verification_code" name="verification_code" class="verification-code" maxlength="6" required enterkeyhint="send">
             </div>
-            <button type="submit">Submit</button>
+                            <br />
+
+            <button type="submit">המשך</button>
         </form>
       {%endif%}
-
+   </div>
+      </div>
     </div>
 </body>
 </html>

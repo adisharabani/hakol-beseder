@@ -31,6 +31,7 @@ body {
 h1 {
     font-size: 24px;
     margin-bottom: 20px;
+    color:#007BFF;
 }
 
 /* Style the form */
@@ -65,9 +66,9 @@ input[type="tel"] {
 
 /* Style the verification code input */
 .verification-code {
-    width: 160px;
-    height: 40px;
-    font-size: 24px;
+    width: 200px;
+    height: 80px;
+    font-size: 48px;
     text-align: center;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -76,7 +77,7 @@ input[type="tel"] {
 /* Style the Submit button */
 button {
     font-size: 18px;
-    padding: 10px 20px;
+    padding: 5px 10px;
     background-color: #007BFF;
     color: #fff;
     border: none;
@@ -184,8 +185,8 @@ button:hover {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 300px; /* Adjust the size of the circle */
-    height: 300px; /* Adjust the size of the circle */
+    width: 30vw; /* Adjust the size of the circle */
+    height: 30vw; /* Adjust the size of the circle */
     background-color: #ccc; /* Circle background color */
     border-radius: 50%; /* Make it circular */
     margin: 10px; /* Adjust the margin as needed */
@@ -200,21 +201,21 @@ button:hover {
 
 .thumb[is_ok='True'] .circle::after {
     content:"👍";
-    font-size: 108px; /* Adjust the size of the icon */
-    margin-top:-20px;
+    font-size: 13vw; /* Adjust the size of the icon */
+    margin-top:-2vw;
 }
 .thumb[is_ok='True']::after {
     content:"כן";
-    font-size: 54px; /* Adjust the size of the icon */
+    font-size: 13vw; /* Adjust the size of the icon */
 }
 .thumb[is_ok='False'] .circle::after {
     content:"👎";
-    margin-top:+20px;
-    font-size: 108px; /* Adjust the size of the icon */
+    margin-top:2vw;
+    font-size: 13vw; /* Adjust the size of the icon */
 }
 .thumb[is_ok='False']::after {
     content:"לא";
-    font-size: 54px; /* Adjust the size of the icon */
+    font-size: 13vw; /* Adjust the size of the icon */
 }
 
 
