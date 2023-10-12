@@ -9,10 +9,15 @@
     <script>
         // Function to copy text to clipboard
         function addFriend() {
-            const copyText = document.getElementById("copyText");
             const currentUrl = window.location.href;
             const prefix = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
-            copyText.value = prefix + "/friend/add?id={{ user.id }}";
+            const url = prefix + "/friend/add?id={{ user.id }}"
+            const message = "הי, ארתה להיות חבר שלך ב-הכל בסדר - האפליקציה שמאפשרת לקבל אישור שהכל בסדר איתך בעת אירוע ביטחוני "
+            document.location.href = "https://wa.me/?text="+encodeURIComponent(message + url)
+            return;
+
+            const copyText = document.getElementById("copyText");
+            copyText.value = url;
 
             copyText.select(); 
             copyText.setSelectionRange(0, 99999); // For mobile devices
@@ -23,11 +28,16 @@
             alert('done')
         }
         function shareGroup(groupId) {
-            const copyText = document.getElementById("copyText");
             const currentUrl = window.location.href;
             const prefix = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
-            copyText.value = prefix + "/?group_id="+groupId;
+            const url = prefix + "/?group_id="+groupId;
+            const message = "הי, מצמין אותך להצטרף לקבוצה שלנו ב-הכל בסדר - האפליקציה שמאפשרת לקבל אישור שהכל בסדר איתך בעת אירוע ביטחוני "
+            document.location.href = "https://wa.me/?text="+encodeURIComponent(message + url)
+            return;
 
+
+            const copyText = document.getElementById("copyText");
+            copyText.value = url
             copyText.select(); 
             copyText.setSelectionRange(0, 99999); // For mobile devices
 
@@ -113,7 +123,7 @@
                 <span class=group-name>הי </span>
                 <input type="text" id="name" class=group-name value="{{ user.name or '' }}" placeholder="עדכן את שמך" onchange="updateUserName(this.value)"/>
             </div>
-            {% if (user.groups or user.friends) and (current_time - user.last_seen).total_seconds() >= 3 %}
+            {% if (user.groups or user.friends) and (current_time - user.last_seen).total_seconds() >= 300 %}
                 <div class="status">
                     <span class=group-name>הכל בסדר?</span>
                     <div class="thumbs">
