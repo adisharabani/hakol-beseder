@@ -1,6 +1,7 @@
 from flask import Flask
 from dotenv import load_dotenv 
 
+ 
 import logging
 import os
 
@@ -11,7 +12,7 @@ app.debug = os.environ.get("DEBUG", "False").lower() != "False"
 app.logger.setLevel(logging.INFO)
 
 app.secret_key = os.environ.get("SECRET_KEY")
-
+print(f"Database Url: {os.environ.get('DATABASE_URL')}")
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL").replace("postgres://","postgresql://")
 
 

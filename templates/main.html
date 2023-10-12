@@ -4,27 +4,180 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="static/css/styles.css">
-    <title>Main</title>
+
+    <title>סטטוס חברים</title>
+    <script>
+        // Function to copy text to clipboard
+        function addFriend() {
+            const copyText = document.getElementById("copyText");
+            const currentUrl = window.location.href;
+            const prefix = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
+            copyText.value = prefix + "/friend/add?id={{ user.id }}";
+
+            copyText.select(); 
+            copyText.setSelectionRange(0, 99999); // For mobile devices
+
+            // Copy the text inside the text field
+            navigator.clipboard.writeText(copyText.value);
+            // document.execCommand("copy");
+            alert('done')
+        }
+        function shareGroup(groupId) {
+            const copyText = document.getElementById("copyText");
+            const currentUrl = window.location.href;
+            const prefix = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
+            copyText.value = prefix + "/?group_id="+groupId;
+
+            copyText.select(); 
+            copyText.setSelectionRange(0, 99999); // For mobile devices
+
+            // Copy the text inside the text field
+            navigator.clipboard.writeText(copyText.value);
+            // document.execCommand("copy");
+            alert('done')            
+        }
+
+        function updateGroupName(groupId, name) {
+            const groupCard = document.getElementById(groupId + '-card');
+            const groupName = groupCard.querySelector("input.group-name")
+            const options = {method:'POST', body: JSON.stringify({name:name, id:groupId}),
+                             headers: { 'Content-Type': 'application/json'}}
+
+            fetch('group/update', options)
+              .then(data   => { groupName.value = name; })
+              .catch(error => { console.error('Error:', error); });
+        }
+        function leaveGroup(groupId) {
+            var confirmation = confirm("האם לצאת מהקבוצה?");
+            if (!confirmation) { return }
+
+
+            const options = {method:'POST', body: JSON.stringify({leave:true, id:groupId}),
+                             headers: { 'Content-Type': 'application/json'}}
+
+            fetch('group/update', options)
+              .then(data   => { document.location.href = document.location.pathname;  })
+              .catch(error => { console.error('Error:', error); });
+        }
+
+        function updateStatus(is_ok) {
+            const options = {method:'POST', body: JSON.stringify({is_ok:is_ok}),
+                             headers: { 'Content-Type': 'application/json'}}
+
+            fetch('status/update', options)
+              .then(data   => { document.location.href = "/{%if selected_group%}?group_id={{selected_group.id}}{%endif%}" })
+              .catch(error => { alert('Error:' + error); });
+        }
+
+        function updateUserName(name) {
+            const options = {method:'POST', body: JSON.stringify({name:name}),
+                             headers: { 'Content-Type': 'application/json'}}
+
+            fetch('status/update', options)
+              .then(data   => { console.info('updated') })
+              .catch(error => { console.error('Error:', error); });
+        }
+
+
+
+
+        // Function to toggle group details view
+        function toggleGroupDetails(groupId) {
+            const groupCard = document.getElementById(groupId + '-card');
+            const groupDetails = document.getElementById(groupId + '-details');
+
+            if (groupCard.style.display === 'none') {
+                groupCard.style.display = 'block';
+                groupDetails.style.display = 'none';
+            } else {
+                groupCard.style.display = 'none';
+                groupDetails.style.display = 'block';
+                groupDetails.scrollIntoView({ behavior: "smooth" });
+            }
+        }
+
+        {% if selected_group != None %}
+        window.onload = function () {
+            toggleGroupDetails('{{selected_group.id}}');
+        }
+        {% endif %}
+
+    </script>
 </head>
 <body>
+    <input type="text" id="copyText" value="" style="display: none;">
+
     <div class="container">
-        <div class="profile">
-            <h1>Edit Profile</h1>
-            <p>Name: <input type="text" id="name" value="{{ user.name }}" /></p>
-            <p>Phone number: {{ user.phone_number }}</p>
-        </div>
         <div class="groups">
-            <h2>My Groups</h2>
+            <div class="profile">
+                <span class=group-name>הי </span>
+                <input type="text" id="name" class=group-name value="{{ user.name or '' }}" placeholder="עדכן את שמך" onchange="updateUserName(this.value)"/>
+            </div>
+            {% if (user.groups or user.friends) and (current_time - user.last_seen).total_seconds() >= 300 %}
+                <div class="status">
+                    <span class=group-name>הכל בסדר?</span>
+                    <div class="thumbs">
+                    <div class="thumb" is_ok="True" onclick="updateStatus(true);">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="thumb" is_ok="False" onclick="updateStatus(false);">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            {% elif selected_group and selected_group not in user.groups %}
+                <h1> {{ selected_group.owner | repr }} רוצה לצרף אותך לקבוצה {{ selected_group.name or 'ללא שם'}} </h1>
+                <h1> האם לאשר הצטרפות? </h1>
+                <button onclick='document.location.href = "/group/add?id={{selected_group.id}}"'>כן</button>
+                <button onclick='document.location.href = document.location.pathname'>לא</button>
+
+            {%else%}
+            {% set maxEventTime = min_datetime %}
             {% for group in user.groups %}
-                <div class="group-item">
-                    <span>{{ group.name }}</span>
-                    <span>({{ group.num_users }} users)</span>
+                {% set groupScore = group.get_status_score() %}
+                {% set groupEventTimeStamp = group.get_last_event_time() %}
+                {% if maxEventTime < groupEventTimeStamp %}
+                    {% set maxEventTime = groupEventTimeStamp %}
+                {% endif %}
+                <div class="group-card" id="{{ group.id }}-card" onclick="toggleGroupDetails('{{ group.id }}')">
+                    <span class=status score="{{groupScore}}" ></span>
+                    <input readonly type="text" class=group-name score="{{groupScore}}" placeholder="קבוצה חדשה" value="{{ group.name or '' }}" />
+                    <p>{{group.count_score(10) }} / {{ group.users | length }} משתמשים אישרו שהם בסדר {{groupEventTimeStamp | fromRelativeDate}}</p>
+                </div>
+                <div class="group-details" id="{{ group.id }}-details">
+                    <span class=status score="{{groupScore}}" ></span>
+                    <input type="text" class=group-name  placeholder="עדכן את שם הקבוצה" onchange="updateGroupName('{{group.id}}', this.value)" value="{{ group.name or '' }}" />
+                    <ul>
+                        {% for friend in group.users | sort(attribute='is_ok', reverse=true) | sort(attribute='last_seen', reverse=true) %}
+                            <li>
+                                <span class=status score="{{friend.get_status_score(timestamp=groupEventTimeStamp)}}" ></span>
+                                <span class=user>{{ friend | repr}}</span>
+                                <span class=last-seen is_ok={{friend.is_ok}}>{{ friend.last_seen | relativeDate}}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                    <button class="button" onclick="toggleGroupDetails('{{ group.id }}')">הקטן</button>
+                    <button class="button" onclick="shareGroup('{{ group.id }}')">צרף חברים לקבוצה</button>
+                    <button class="button" onclick="leaveGroup('{{ group.id }}')">צא מהקבוצה</button>
                 </div>
             {% endfor %}
-        </div>
-        <div class="buttons">
-            <a href="group/add" class="button">Add Group +</a>
-            <a href="#" onclick="alert('share')" class="button">Share with Your Friends</a>
+            {% for friend in user.friends | sort(attribute='is_ok', reverse=true) | sort(attribute='last_seen', reverse=true) %}
+                <div>
+                    <span class=status score="{{friend.get_status_score(timestamp=maxEventTime)}}" ></span>
+                    <span class=user>{{ friend | repr }}</span>
+                    <span class=last-seen is_ok={{friend.is_ok}}>{{ friend.last_seen | relativeDate}}</span>
+                </div>
+            {% endfor %}
+
+            <!-- Other content goes here -->
+            <div class="buttons">
+                <button class="button" onclick="document.location.href = 'group/add'">הוסף קבוצה</button>
+                <button class="button" onclick="addFriend();return false;" >הוסף חברים</button>
+                <button class="button" onclick="alert('share')" class="button">ספר לאחרים על האפליקציה</button>
+            </div>
+            {% endif %}
+
         </div>
     </div>
+
 </body>
+</html>
