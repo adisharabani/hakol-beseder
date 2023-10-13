@@ -166,7 +166,7 @@ def addGroup():
     group.users.append(user)
     db.session.add(group)
     db.session.commit()
-    return myRedirect("main", f"group_id={group.id}")
+    return myRedirect("main")#, f"group_id={group.id}")
 
 @app.route("/group/update", methods=['POST'])
 def updateGroup():
