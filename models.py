@@ -31,8 +31,8 @@ class User(db.Model):
     phone_number = db.Column(db.String(15), unique=True, nullable=False)  # Added phone_number field
     name = db.Column(db.String(80), unique=False, nullable=True)
     status = db.Column(db.String(255), nullable=True)  # Added status field
-    last_seen = db.Column(db.TIMESTAMP, default=datetime.utcnow)  # Added last_seen field
-    prev_seen = db.Column(db.TIMESTAMP, default=datetime.utcnow)  # The event before the last seen
+    last_seen = db.Column(db.TIMESTAMP, default=datetime.min)  # Added last_seen field
+    prev_seen = db.Column(db.TIMESTAMP, default=datetime.min)  # The event before the last seen
     is_ok = db.Column(db.Boolean, default=True)  # Added isOk field
  
    # Define a many-to-many relationship for mutual friendships
