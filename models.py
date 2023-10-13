@@ -56,7 +56,7 @@ class User(db.Model):
         print("A")
         print(repr(self.last_seen))
         print(repr(timestamp))
-        if self.is_ok and self.last_seen >= (timestamp - timedelta(minutes=1)): 
+        if self.is_ok and self.last_seen + timedelta(minutes=1) >= timestamp: 
             print(10)
             return 10
         elif self.is_ok:

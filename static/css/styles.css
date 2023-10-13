@@ -54,7 +54,7 @@ input[type="tel"] {
     width: 100%;
     border: 1px solid #ccc;
     border-radius: 5px;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     text-align: center;
 }
 
@@ -104,8 +104,54 @@ button:hover {
             background-color: #fff;
             box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
             border-radius: 10px;
-            padding: 20px;
+            padding: 10px;
             margin-bottom: 20px; /* Add margin between group cards */
+        }
+
+        .group-header {
+            display: flex;
+        }
+
+
+        .menu {
+            margin-right: auto;
+
+            width:50px;
+            height:24px;
+            background-image: radial-gradient(circle at 10px center, black 2px, transparent 3px) ;
+            background-size: 100% 33.33%;
+        }
+        .menu nav {
+            z-index:1001;
+            width:fit-content;
+            min-width:200px;
+            transform:translate(100%,0) translate(-20px,0);
+            background-color:#eee;
+            visibility: hidden;
+            padding: 20px;           /* Padding inside the box */
+            background-color: #fff;  /* White background */
+            border: 1px solid #ccc;  /* Optional: A light border */
+            border-radius: 8px;      /* Rounded corners */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1), /* Horizontal and vertical offset, blur, and color */
+                       0 2px 4px rgba(0, 0, 0, 0.06); /* You can layer multiple shadows for a more nuanced effect */
+
+        }
+
+        .menu  nav:active,
+        .menu:focus  nav {
+            visibility: visible;
+        }
+
+        .menu nav ul {
+            list-style: none;
+            padding:0px;
+        }
+        .menu nav li {
+            padding:5px;
+            text-align:left;
+        }
+        .menu nav li:hover {
+            background-color: #ddd;
         }
 
         .group-card {
@@ -116,10 +162,6 @@ button:hover {
             transform: scale(1.05);
         }
 
-        /* Additional styles for the group details view */
-        .group-details {
-            display: none;
-        }
 
         .group-name {
             font-size: 24px;
@@ -128,33 +170,63 @@ button:hover {
             border: none;
             outline: none; /* Remove the outline when focused */
         }
-        .group-name:focus {
+        .group-name:focus, .group-name[value='']:not([readonly]) {
             border: 1px solid #ccc;
         }
 
         .status {
             font-size: 24px;
             margin-bottom: 20px;
+            position:relative; top:3px
         }
 
         .status[score='0']::before  { content: '🔴'; }
         .status[score='5']::before  { content: '🟡'; }
         .status[score='10']::before { content: '🟢'; }
-
-        .group-details ul {
+        div > .status {
+            cursor: pointer;
+        }
+        div > .status::after { 
+            border-style: solid;
+            border-width: 5px 5px 0 0;
+            border-color: #ffffffee;
+            content: '';
+            display: inline-block;
+            height: 6px;
+            left: 18px;
+            position: relative;
+            top: 10px;
+            transform: rotate(-45deg);
+            vertical-align: top;
+            width: 6px;
+        }
+        div > .group-card[collapsed='true'] .status::after {
+            transform: rotate(135deg);
+            top: 8px;
+        }
+        [collapsed='false'] [showIf='collapsed'],
+        [collapsed='true'] [showIf='expanded'] {
+            display:none;
+        }
+        .indent {
+            padding-right:20px;
+        }
+        /*
+        .group-card ul {
             list-style: none;
             padding: 0;
         }
 
-        .group-details li {
+        .group-card li {
             font-size: 18px;
             margin-bottom: 10px;
             margin-right:20px;
-        }
+        } */
 
         .last-seen {
-            font-size: 18px;
+            font-size: 16px;
             color: grey;
+            padding-right:30px;
         }
         .last-seen[is_ok='False'] {
             color: darkred;
@@ -164,8 +236,8 @@ button:hover {
         .last-seen[is_ok='True']::before  { content: "(👍"; }
         .last-seen[is_ok='False']::before { content: "(👎🏿"; }
 
-
-
+/*        .group-card > div { position:absolute;}*/
+        
 /* Style for the thumbs container */
 .thumbs {
     display: flex;
