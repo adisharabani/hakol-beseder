@@ -4,7 +4,7 @@ from myApp import app
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import JSON, select
+from sqlalchemy import JSON,desc, asc
 from sqlalchemy.orm import relationship
 
 from datetime import datetime, timedelta
@@ -46,7 +46,7 @@ class User(db.Model):
     def friends(self):
         friend_ids = [friend.id for friend in self.my_friends]
         friend_ids += [friend.id for friend in User.query.filter(User.my_friends.any(id=self.id))]
-        return self.query.filter(User.id.in_(friend_ids))
+        return self.query.filter(User.id.in_(friend_ids)).order_by(asc(User.is_ok), asc(User.last_seen))
 
     def add_friend(self, friend):
         if friend not in self.my_friends:
@@ -77,7 +77,7 @@ class Group(db.Model):
     
     # Relationships
     owner = relationship('User', foreign_keys=[owner_id], backref='owner_of_groups')
-    users = relationship('User', secondary='group_users', backref='groups')
+    users = relationship('User', secondary='group_users', backref='groups',order_by=[asc(User.is_ok), asc(User.last_seen)])
     admins = relationship('User', secondary='group_admins', backref='admin_of_groups')
     viewers = relationship('User', secondary='group_viewers', backref='viewer_of_groups')
     def __repr__(self):
@@ -85,28 +85,9 @@ class Group(db.Model):
 
     def get_last_event_time(self):
         # Extract last_seen timestamps of all users in the group
-        last_seen_timestamps = [user.last_seen for user in self.users]
-        return sorted(last_seen_timestamps)[:1][-1]
-        if not last_seen_timestamps:
-            return datetime.min  # No users in the group, cannot determine last event time
-
-        # Sort the timestamps in ascending order
-        sorted_timestamps = sorted(last_seen_timestamps)
-
-        # Calculate time differences between consecutive timestamps
-        time_diffs = [(b - a).total_seconds() for a, b in zip(sorted_timestamps, sorted_timestamps[1:])]
-
-        # Calculate a measure of central tendency (e.g., median)
-        central_tendency = statistics.median(time_diffs)
-
-        burst_start_timestamps = [timestamp1 for timestamp1, timestamp2 in zip(sorted_timestamps, sorted_timestamps[1:])
-                           if (timestamp2 - timestamp1).total_seconds() < central_tendency * 0.5]
-
-
-        # Find the minimal timestamp within the last burst
-        last_burst_min_timestamp = min(burst_start_timestamps, default=None)
-
-        return last_burst_min_timestamp - timedelta(minutes=1)
+        ts = [user.last_seen for user in self.users]
+        ts.sort(reverse=True)
+        return next((ts[i] for i in range(len(ts) - 1) if ts[i] - ts[i + 1] > timedelta(minutes=10)), datetime.min)
 
     def get_status_score(self):
         timestamp = self.get_last_event_time()

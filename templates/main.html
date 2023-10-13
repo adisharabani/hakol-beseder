@@ -11,7 +11,7 @@
         function addFriend() {
             const currentUrl = window.location.href;
             const prefix = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
-            const url = prefix + "/friend/add?id={{ user.id }}"
+            const url = prefix + "/?friend_id={{ user.id }}"
             const message = "הי, ארצה להיות חבר שלך ב-הכל בסדר - האפליקציה שמאפשרת לקבל אישור שהכל בסדר איתך בעת אירוע ביטחוני "
             document.location.href = "https://wa.me/?text="+encodeURIComponent(message + url)
             return;
@@ -80,12 +80,18 @@
         function toggleGroupDetails(groupId) {
             const groupCard = document.getElementById(groupId + '-card');
             groupCard.setAttribute('collapsed', (groupCard.getAttribute('collapsed') != 'true').toString())
-            groupCard.scrollIntoView({ behavior: "smooth" });
+            //groupCard.scrollIntoView({ behavior: "smooth" });
         }
 
         {% if selected_group != None %}
         window.onload = function () {
             toggleGroupDetails('{{selected_group.id}}');
+            document.getElementById('{{selected_group.id}}-card').scrollIntoView({ behavior: "smooth" });
+        }
+        {% endif %}
+        {% if selected_friend != None %}
+        window.onload = function () {
+            document.getElementById('{{selected_friend.id}}-friend').scrollIntoView({ behavior: "smooth" });
         }
         {% endif %}
 
@@ -100,6 +106,7 @@
                 <input type="text" id="name" class=group-name value="{{ user.name or '' }}" placeholder="עדכן את שמך" onchange="updateUserName(this.value)"/>
             </div>
             {% if (user.groups or user.friends) and (current_time - user.last_seen).total_seconds() >= 300 %}
+                <!-- Login -->
                 <div class="status">
                     <span class=group-name>הכל בסדר?</span>
                     <div class="thumbs">
@@ -111,82 +118,91 @@
                     </div>
                 </div>
             {% elif selected_group and selected_group not in user.groups %}
+                <!-- Approve group add -->
                 <h1> {{ selected_group.owner | repr }} רוצה לצרף אותך לקבוצה {{ selected_group.name or 'ללא שם'}} </h1>
                 <h1> האם לאשר הצטרפות? </h1>
                 <button onclick='document.location.href = "/group/add?id={{selected_group.id}}"'>כן</button>
                 <button onclick='document.location.href = document.location.pathname'>לא</button>
 
-            {%else%}
-            {% set maxEventTime = min_datetime %}
-            {% for group in user.groups %}
-                {% set groupScore = group.get_status_score() %}
-                {% set groupEventTimeStamp = group.get_last_event_time() %}
-                {% if maxEventTime < groupEventTimeStamp %}
-                    {% set maxEventTime = groupEventTimeStamp %}
-                {% endif %}
-                <div class="group-card" id="{{ group.id }}-card" collapsed='true' onclick="if (this.getAttribute('collapsed')=='true') toggleGroupDetails('{{ group.id }}')">
-                    <div class=group-header>
-                        <span class=status score="{{groupScore}}" onclick="toggleGroupDetails('{{ group.id }}'); event.stopPropagation();"></span>
-                        <input type="text" class=group-name  placeholder="עדכן את שם הקבוצה" onchange="updateGroupName('{{group.id}}', this.value)" value="{{ group.name or '' }}" />
-                        <span class=menu onclick='event.stopPropagation()' tabindex=1>
-                            <nav>
-                              <ul>
-                                <li>
-                                  <div onclick="shareGroup('{{ group.id }}')">
-                                    הוספת אנשים לקבוצה
-                                  </div>
-                                </li>
-                                <li>
-                                  <div onclick="leaveGroup('{{ group.id }}')">
-                                    יציאה מהקבוצה
-                                  </div>
-                                </li>
-                              </ul>
-                            </nav>
-                        </span>
-                    </div>
-                    <div class=group-body>
-                        {% if group.users|length == 1 %} 
-                            <p>לחץ על שלוש הנקודות כדי להוסיף משתמשים</p><br />
-                        {%endif%}
-                        <div showIf="collapsed">
-                            {%if group.users|length == group.count_score(10) %}
-                                <p>כל {{ group.users | length }} המשתמשים אישרו שהם בסדר {{groupEventTimeStamp | fromRelativeDate}}</p>
-                            {%else%}
-                            <p>{{group.count_score(10) }} מ-{{ group.users | length }} משתמשים אישרו שהם בסדר {{groupEventTimeStamp | fromRelativeDate}}</p>
-                            {%endif%}
-                        </div>
-                         <div showIf="expanded">
-                            {% if group.users|length > 1 %} 
-                             
-                                {% for friend in group.users | sort(attribute='is_ok', reverse=true) | sort(attribute='last_seen', reverse=false) %}
-                                    <div class=indent>
-                                        <span class=status score="{{friend.get_status_score(timestamp=groupEventTimeStamp)}}" ></span>
-                                        <span class=user>{{ friend | repr}}</span>
-                                        <BR />
-                                        <span class=last-seen is_ok={{friend.is_ok}}>{{ friend.last_seen | relativeDate}}</span>
-                                    </div>
-                                {% endfor %}
-                            {%endif%}
-                            
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-            {% for friend in user.friends | sort(attribute='is_ok', reverse=true) | sort(attribute='last_seen', reverse=true) %}
-                <div>
-                    <span class=status score="{{friend.get_status_score(timestamp=maxEventTime)}}" ></span>
-                    <span class=user>{{ friend | repr }}</span><br>
-                    <span class=last-seen is_ok={{friend.is_ok}}>{{ friend.last_seen | relativeDate}}</span>
-                </div>
-            {% endfor %}
+            {% elif selected_friend and selected_friend not in user.friends %}
+                <!-- Approve friend add -->
+                <h1> {{ selected_friend | repr }} רוצה לצרף להתחבר איתך כדי שתכולו לוודא ששניכם בסדר</h1>
+                <h1> האם לאשר חברות? </h1>
+                <button onclick='document.location.href = "/friend/add?id={{selected_friend.id}}"'>כן</button>
+                <button onclick='document.location.href = document.location.pathname'>לא</button>
 
-            <!-- Other content goes here -->
-            <div class="buttons">
-                <button class="button" onclick="document.location.href = 'group/add'">+ קבוצה</button>
-                <button class="button" onclick="addFriend();return false;" >+ חברים</button>
-                <button class="button" onclick="shareApp()" class="button">ספר לאחרים</button>
-            </div>
+            {%else%}
+                {% set maxEventTime = min_datetime %}
+                {% for group in user.groups %}
+                    {% set groupScore = group.get_status_score() %}
+                    {% set groupEventTimeStamp = group.get_last_event_time() %}
+                    {% if maxEventTime < groupEventTimeStamp %}
+                        {% set maxEventTime = groupEventTimeStamp %}
+                    {% endif %}
+                    <div class="group-card" id="{{ group.id }}-card" collapsed='true' onclick="if (this.getAttribute('collapsed')=='true') toggleGroupDetails('{{ group.id }}')">
+                        <div class=group-header>
+                            <span class=status score="{{groupScore}}" onclick="toggleGroupDetails('{{ group.id }}'); event.stopPropagation();"></span>
+                            <input type="text" class=group-name  placeholder="עדכן את שם הקבוצה" onchange="updateGroupName('{{group.id}}', this.value)" value="{{ group.name or '' }}" />
+                            <span class=menu onclick='event.stopPropagation()' tabindex=1>
+                                <nav>
+                                  <ul>
+                                    <li>
+                                      <div onclick="shareGroup('{{ group.id }}')">
+                                        הוספת אנשים לקבוצה
+                                      </div>
+                                    </li>
+                                    <li>
+                                      <div onclick="leaveGroup('{{ group.id }}')">
+                                        יציאה מהקבוצה
+                                      </div>
+                                    </li>
+                                  </ul>
+                                </nav>
+                            </span>
+                        </div>
+                        <div class=group-body>
+                            {% if group.users|length == 1 %} 
+                                <p>לחץ על שלוש הנקודות כדי להוסיף משתמשים</p><br />
+                            {%endif%}
+                            <div showIf="collapsed">
+                                {% if group.users|length == 1 %}
+                                {% elif group.users|length == group.count_score(10) %}
+                                    <p>כל המשתמשים אישרו שהם בסדר {{groupEventTimeStamp | fromRelativeDate}}</p>
+                                {%else%}
+                                <p>{{group.count_score(10) }} מ-{{ group.users | length }} משתמשים אישרו שהם בסדר {{groupEventTimeStamp | fromRelativeDate}}</p>
+                                {%endif%}
+                            </div>
+                             <div showIf="expanded">
+                                {% if group.users|length > 1 %} 
+                                 
+                                    {% for friend in group.users %}
+                                        <div class=indent>
+                                            <span class=status score="{{friend.get_status_score(timestamp=groupEventTimeStamp)}}" ></span>
+                                            <span class=user>{{ friend | repr}}</span>
+                                            <BR />
+                                            <span class=last-seen is_ok={{friend.is_ok}}>{{ friend.last_seen | relativeDate}}</span>
+                                        </div>
+                                    {% endfor %}
+                                {%endif%}
+                                
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                {% for friend in user.friends %}
+                    <div id='{{friend.id}}-friend'>
+                        <span class=status score="{{friend.get_status_score(timestamp=maxEventTime)}}" ></span>
+                        <span class=user>{{ friend | repr }}</span><br>
+                        <span class=last-seen is_ok={{friend.is_ok}}>{{ friend.last_seen | relativeDate}}</span>
+                    </div>
+                {% endfor %}
+
+                <!-- Other content goes here -->
+                <div class="buttons">
+                    <button class="button" onclick="document.location.href = 'group/add'">+ קבוצה</button>
+                    <button class="button" onclick="addFriend();return false;" >+ חברים</button>
+                    <button class="button" onclick="shareApp()" class="button">ספר לאחרים</button>
+                </div>
             {% endif %}
 
         </div>

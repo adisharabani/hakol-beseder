@@ -155,8 +155,10 @@ button:hover {
         }
 
         .group-card {
-            cursor: pointer;
             transition: transform 0.2s ease;
+        }
+        .group-card[collapsed='true'] {
+            cursor: pointer;
         }
         .group-card:hover {
             transform: scale(1.05);
@@ -183,10 +185,10 @@ button:hover {
         .status[score='0']::before  { content: '🔴'; }
         .status[score='5']::before  { content: '🟡'; }
         .status[score='10']::before { content: '🟢'; }
-        div > .status {
+        .group-header .status {
             cursor: pointer;
         }
-        div > .status::after { 
+        .group-header .status::after { 
             border-style: solid;
             border-width: 5px 5px 0 0;
             border-color: #ffffffee;
@@ -200,7 +202,7 @@ button:hover {
             vertical-align: top;
             width: 6px;
         }
-        div > .group-card[collapsed='true'] .status::after {
+        .group-card[collapsed='true'] .status::after {
             transform: rotate(135deg);
             top: 8px;
         }
@@ -233,8 +235,9 @@ button:hover {
         }
         .last-seen::after  { content: ")"; }
         .last-seen::before { content: "("; }
-        .last-seen[is_ok='True']::before  { content: "(👍"; }
-        .last-seen[is_ok='False']::before { content: "(👎🏿"; }
+        .last-seen[is_ok='True']::before  { content: "(👍"; filter: brightness(84%) hue-rotate(75deg) saturate(0%) sepia(0%);}
+        .last-seen[is_ok='False']::before { content: "(👎"; filter: brightness(64%) hue-rotate(290deg) saturate(96%) sepia(0%);            color: darkred;
+}
 
 /*        .group-card > div { position:absolute;}*/
         
@@ -258,7 +261,9 @@ button:hover {
     justify-content: center;
     align-items: center;
     width: 30vw; /* Adjust the size of the circle */
+    max-width:350px;
     height: 30vw; /* Adjust the size of the circle */
+    max-height:350px;
     background-color: #ccc; /* Circle background color */
     border-radius: 50%; /* Make it circular */
     margin: 10px; /* Adjust the margin as needed */
@@ -273,21 +278,21 @@ button:hover {
 
 .thumb[is_ok='True'] .circle::after {
     content:"👍";
-    font-size: 13vw; /* Adjust the size of the icon */
+    font-size: clamp(5px, 13vw, 200px); /* Adjust the size of the icon */
     margin-top:-2vw;
 }
 .thumb[is_ok='True']::after {
     content:"כן";
-    font-size: 13vw; /* Adjust the size of the icon */
+    font-size: clamp(5px, 13vw, 200px);; /* Adjust the size of the icon */
 }
 .thumb[is_ok='False'] .circle::after {
     content:"👎";
     margin-top:2vw;
-    font-size: 13vw; /* Adjust the size of the icon */
+    font-size: clamp(5px, 13vw, 200px);; /* Adjust the size of the icon */
 }
 .thumb[is_ok='False']::after {
     content:"לא";
-    font-size: 13vw; /* Adjust the size of the icon */
+    font-size: clamp(5px, 13vw, 200px);; /* Adjust the size of the icon */
 }
 
 

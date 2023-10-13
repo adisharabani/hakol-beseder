@@ -97,8 +97,8 @@ def login(pending_group_id = None, pending_friend_id = None):
     phone_number = request.form.get("phone_number")
     verification_code = request.form.get("verification_code")
 
-    pending_group_id = request.form.get("pending_group_id",pending_group_id)
-    pending_friend_id = request.form.get("pending_friend_id",pending_friend_id)
+    pending_group_id = request.args.get("pending_group_id",pending_group_id)
+    pending_friend_id = request.args.get("pending_friend_id",pending_friend_id)
 
     if phone_number and "verification-code" not in session or request.form.get("resend_verification_code"):
         #Invent Verification Code
@@ -112,27 +112,34 @@ def login(pending_group_id = None, pending_friend_id = None):
         if pending_friend_id:
             return myRedirect("addFriend", f"id={pending_friend_id}")
         elif pending_group_id:
-            return myRedirect("group", f"id={pending_group_id}")
+            return myRedirect("addGroup", f"id={pending_group_id}")
         else:
             return myRedirect("main")
 
-    return render_template("login.html", phone_number=phone_number, verification_code = verification_code, pending_group_id = pending_group_id)
+    return render_template("login.html", phone_number=phone_number, verification_code = verification_code, 
+                            pending_group_id = pending_group_id, pending_friend_id = pending_friend_id)
  
 
 @app.route('/', methods=["GET", "POST"])
 def main():
     group_id = request.args.get("group_id")
+    friend_id = request.args.get("friend_id")
     user = getCurrentUser()
-    if user is None: return myRedirect("login", f"pending_group_id={group_id}" if group_id else None)
+    if user is None: 
+        if group_id: return myRedirect("login", f"pending_group_id={group_id}")
+        if friend_id: return myRedirect("login", f"pending_friend_id={friend_id}")
 
-    if request.form.get("status"):
+    if request.form.get("status"): #TODO: WHAT IS THIS?
         print(request.form.get("status"))
 
-    group_id = request.args.get("group_id")
+    #group_id = request.args.get("group_id")
     group = db.session.query(Group).filter_by(id=group_id).first() if group_id else None
+    friend = db.session.query(User).filter_by(id=friend_id).first() if friend_id else None
 
     #TODO: Add group invite screen
-    return render_template("main.html", user=user, selected_group=group, current_time = datetime.utcnow(), min_datetime=datetime.min)
+    return render_template("main.html", 
+                            user=user, selected_group=group, selected_friend=friend,
+                            current_time = datetime.utcnow(), min_datetime=datetime.min)
 
 @app.route('/is_ok')
 def is_ok():
@@ -148,7 +155,7 @@ def addGroup():
 
     user = getCurrentUser()
     if user is None:
-        return myRedirect("login")
+        return myRedirect("login", f"pending_group_id={group_id}")
 
     if group_id:
         group = db.session.query(Group).filter_by(id=group_id).first()
