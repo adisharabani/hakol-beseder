@@ -131,17 +131,10 @@
             // Set the text content based on minutes passed
             if (minutesPassed === 1) {
                 updated.textContent = "עודכן לפני דקה";
+                updated2.textContent = "עודכן לפני דקה";
             } else if (minutesPassed > 1) {
                 updated.textContent = "עודכן לפני " + minutesPassed + " דקות";
-            }
-
-            // If 5 or more minutes have passed, change style
-            if (minutesPassed >= 1) {
-                updated.style.color = "red";
-            }
-
-            if (minutesPassed >= 2) {
-                updated.style.animation = "blink 1s infinite";
+                updated2.textContent = "עודכן לפני " + minutesPassed + " דקות";
             }
 
             updated.onclick = function() {document.location.reload() }
@@ -152,6 +145,7 @@
         window.onload = function () {
             // Initialize with "updated just now"
             updated.textContent = "";
+            updated2.textContent = "הנתונים נכונים לדקה האחרונה";
             // Set interval to update text every minute (60,000 milliseconds)
             setInterval(updateText, 60*1000);
         }
@@ -307,6 +301,7 @@
 
                 <!-- Other content goes here -->
                 <div class="buttons">
+                    <p style='display: flex;color:gray' id=updated2></p>
                 </div>
             {% endif %}
 
