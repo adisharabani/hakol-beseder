@@ -38,7 +38,7 @@
          </div>
         <h1 style='text-align:center;'>מה מספר הטלפון שלך?</h1>
         <form  method="POST">
-            <input type="tel" id="phone_number" name="phone_number" value="{%if phone_number%}{{phone_number}}{%endif%}" placeholder="מספר טלפון" required enterkeyhint="send" style='direction:ltr'/>
+            <input type="tel" id="phone_number" name="phone_number" value="{%if phone_number%}{{phone_number}}{%endif%}" placeholder="מספר טלפון" required enterkeyhint="send" style='direction:ltr' oninput="if(!window.prev && this.value.length==9){this.value ='0'+this.value;};window.prev=this.value"/>
             {% if phone_number %}
                <p style="color:red">מספר הטלפון שהקשת אינו תקין</p>
             {% endif %}
