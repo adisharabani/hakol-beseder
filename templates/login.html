@@ -1,30 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
+{% if group %}
+   {%if friend %}
+      {% set message = (friend | repr) + " הזמין אותך להצטרף לקבוצה '" + group.name + "' באפליקצית " %}
+   {%else%}
+      {% set message = "הזמינו אותך להצטרף לקבוצה '" + group.name + "' באפליקצית " %}
+   {%endif%}
+{% elif friend %}
+   {% set message = (friend | repr) + " הזמין אותך להצטרף לאפליקצית " %}
+{% else %}
+   {% set message = "ברוכים הבאים לאפליקצית " %}
+{%endif%}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="static/css/styles.css">
-    <title>Login</title>
+    <title>login</title>
+    <meta property="og:title" content="הכל בסדר">
+    <meta property="og:description" content="{{message}} יהיה בסדר ולוודא שהכל בסדר איתך בעת אירוע בטחוני!">
+    <meta property="og:image" content="static/images/og_image.jpg">
+
 </head>
 <body>
     <div class="container">
       <div class="groups">
          <div>
-      {%if not phone_number %}
-         <h1 style='text-align:center'>💬👌<h1>
-        <h1>היי, מה מספר הטלפון שלך?</h1>
+      {%if not number_e164 %}
+         <br />
+         <h1 style='text-align:center'>💬👌</h1>
+         <h3>
+            {{ message }}<b>יהיה בסדר</b>
+         </h3>
+         <br />
+         <h3>בעת אירוע ביטחוני נכנסים,</h3>
+         <h3><span class=indent>מעדכנים שהכל בסדר,</span></h3>
+         <h3><span class=indent><span class=indent>ורואים מי בסדר ומי לא!</span></span></h3>
+         <br />
+         <br />
+        <h1>מה מספר הטלפון שלך?</h1>
         <form  method="POST">
-            <input type="tel" id="phone_number" name="phone_number" placeholder="מספר טלפון" required>
+            <input type="tel" id="phone_number" name="phone_number" value="{%if phone_number%}{{phone_number}}{%endif%}" placeholder="מספר טלפון" required enterkeyhint="send" style='direction:ltr'/>
+            {% if phone_number %}
+               <p style="color:red">מספר הטלפון שהקשת אינו תקין</p>
+            {% endif %}
+            <br/>
             <button type="submit">המשך</button>
         </form>
+
       {%else%}
         <h1>מה מספר האימות שקיבלת?</h1>
         <form method="POST">
             <div class="verification-code-container">
-                <input type="hidden" value="{{ phone_number }}" name="phone_number" id="phone_number" />
-                <input type="text" inputmode="numeric" pattern="[0-9]*" id="verification_code" name="verification_code" class="verification-code" maxlength="6" required enterkeyhint="sendq">
+                <input type="hidden" value="{%if phone_number%}{{phone_number}}{%endif%}" name="phone_number" id="phone_number" />
+                <input type="text" inputmode="numeric" pattern="[0-9]*" id="verification_code" name="verification_code" class="verification-code" maxlength="6" required enterkeyhint="send">
             </div>
-                            <br />
+            {% if verification_code %}
+               <p style="color:red">הקוד שהוקש אינו תקין</p>
+            {% endif %}
+            <br />
 
             <button type="submit">המשך</button>
         </form>

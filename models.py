@@ -46,7 +46,7 @@ class User(db.Model):
     def friends(self):
         friend_ids = [friend.id for friend in self.my_friends]
         friend_ids += [friend.id for friend in User.query.filter(User.my_friends.any(id=self.id))]
-        return self.query.filter(User.id.in_(friend_ids)).order_by(asc(User.is_ok), asc(User.last_seen))
+        return self.query.filter(User.id.in_(friend_ids)).order_by(desc(User.last_seen)) #desc(User.is_ok), desc(User.last_seen))
 
     def add_friend(self, friend):
         if friend not in self.my_friends:
@@ -56,7 +56,7 @@ class User(db.Model):
         print("A")
         print(repr(self.last_seen))
         print(repr(timestamp))
-        if self.is_ok and self.last_seen + timedelta(minutes=1) >= timestamp: 
+        if self.is_ok and (timestamp == None or (self.last_seen + timedelta(minutes=1) >= timestamp)): 
             print(10)
             return 10
         elif self.is_ok:
@@ -77,7 +77,7 @@ class Group(db.Model):
     
     # Relationships
     owner = relationship('User', foreign_keys=[owner_id], backref='owner_of_groups')
-    users = relationship('User', secondary='group_users', backref='groups',order_by=[asc(User.is_ok), asc(User.last_seen)])
+    users = relationship('User', secondary='group_users', backref='groups',order_by=[desc(User.last_seen)]) #desc(User.is_ok), desc(User.last_seen)])
     admins = relationship('User', secondary='group_admins', backref='admin_of_groups')
     viewers = relationship('User', secondary='group_viewers', backref='viewer_of_groups')
     def __repr__(self):
@@ -86,8 +86,9 @@ class Group(db.Model):
     def get_last_event_time(self):
         # Extract last_seen timestamps of all users in the group
         ts = [user.last_seen for user in self.users]
+        if not ts: return datetime.min
         ts.sort(reverse=True)
-        return next((ts[i] for i in range(len(ts) - 1) if ts[i] - ts[i + 1] > timedelta(minutes=10)), datetime.min)
+        return next((ts[i] for i in range(len(ts) - 1) if ts[i] - ts[i + 1] > timedelta(minutes=10)), min(ts))
 
     def get_status_score(self):
         timestamp = self.get_last_event_time()

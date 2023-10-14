@@ -96,8 +96,9 @@ button:hover {
     outline: none; /* Remove the outline when focused */
 }
 
+
 /* Add a border when focused */
-.nice_input:focus {
+.nice_input:focus:not([readonly]), .nice_input[value='']:not([readonly]) {
     border: 1px solid #ccc;
 }
         .groups > div {            
@@ -110,8 +111,12 @@ button:hover {
 
         .group-header {
             display: flex;
+            cursor:pointer;
         }
 
+        .profile {
+            display: flex;
+        }
 
         .menu {
             margin-right: auto;
@@ -149,6 +154,7 @@ button:hover {
         .menu nav li {
             padding:5px;
             text-align:left;
+            font-size:24px;
         }
         .menu nav li:hover {
             background-color: #ddd;
@@ -156,6 +162,7 @@ button:hover {
 
         .group-card {
             transition: transform 0.2s ease;
+            z-index:1;
         }
         .group-card[collapsed='true'] {
             cursor: pointer;
@@ -164,16 +171,18 @@ button:hover {
             transform: scale(1.05);
         }
 
-
         .group-name {
             font-size: 24px;
             font-family: Arial, sans-serif;
             margin-bottom: 20px;
             border: none;
             outline: none; /* Remove the outline when focused */
+            cursor: pointer;
+
         }
-        .group-name:focus, .group-name[value='']:not([readonly]) {
+        .group-name:focus:not([readonly]), .group-name[value='']:not([readonly]) {
             border: 1px solid #ccc;
+            cursor: text;
         }
 
         .status {
@@ -297,5 +306,9 @@ button:hover {
 
 
 
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
 
 
