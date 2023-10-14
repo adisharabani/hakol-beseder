@@ -87,6 +87,30 @@ def fromRelativeDate(last_seen):
     else:
         return "מאז " + last_seen.strftime("%d/%m/%Y")
 
+@app.before_request
+def enforce_https_and_naked_domain():
+    if request.url.startswith("http://127") and not request.url.startswith("http://imac"):
+        return
+
+    # Check for "www" and redirect to naked domain
+    if request.url.startswith('https://www.'):
+        url = request.url.replace('https://www.', 'https://', 1)
+        code = 301
+        return redirect(url, code=code)
+
+    # Check for "www" and redirect to naked domain
+    if request.url.startswith('http://www.'):
+        url = request.url.replace('http://www.', 'https://', 1)
+        code = 301
+        return redirect(url, code=code)
+
+    # Check for HTTP and redirect to HTTPS
+    if request.url.startswith('http://'):
+        url = request.url.replace('http://', 'https://', 1)
+        code = 301
+        return redirect(url, code=code)
+
+
 @app.route("/test")
 def test():
     return "TEST"
