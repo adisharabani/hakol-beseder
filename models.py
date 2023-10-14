@@ -53,17 +53,11 @@ class User(db.Model):
             self.my_friends.append(friend)
 
     def get_status_score(self, timestamp):
-        print("A")
-        print(repr(self.last_seen))
-        print(repr(timestamp))
         if self.is_ok and (timestamp == None or (self.last_seen + timedelta(minutes=1) >= timestamp)): 
-            print(10)
             return 10
         elif self.is_ok:
-            print(5)
             return 5
         else:
-            print(0)
             return 0
 
     def __repr__(self):

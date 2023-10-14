@@ -34,6 +34,18 @@
             // document.location.href = "https://wa.me/?text="+encodeURIComponent(message + url)
             return;
         }
+        function removeFriend(friendId) {
+            var confirmation = confirm("האם למחוק את החבר?");
+            if (!confirmation) { return }
+
+
+            const options = {method:'POST', body: JSON.stringify({id:friendId}),
+                             headers: { 'Content-Type': 'application/json'}}
+
+            fetch('friend/remove', options)
+              .then(data   => { document.location.href = document.location.pathname;  })
+              .catch(error => { console.error('Error:', error); });
+        }
 
         function shareGroup(groupId) {
             const currentUrl = window.location.href;
@@ -48,7 +60,7 @@
         function shareApp() {
             const currentUrl = window.location.href;
             const url = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
-            const message = "הי, האפליקציה הזו לשתף ולקבל אישור שהכל בסדר עם החברים העבודה והמספחה בעת אירוע ביטחוני"
+            const message = "הי, האפליקציה הזו מאפשרת לשתף ולקבל אישור שהכל בסדר עם החברים העבודה והמספחה בעת אירוע ביטחוני"
             socialShare(message + url)
             // document.location.href = "https://wa.me/?text="+encodeURIComponent(message + prefix)
             return;   
@@ -140,7 +152,22 @@
             updated.onclick = function() {document.location.reload() }
             updated.style.cursor = "pointer"
         }
+        function canAcceptFocus(element) {
+            // Check if the element is naturally focusable (e.g., input, button, a[href], etc.)
+            if (/^(a|area|input|select|textarea|button|iframe|details|summary|[role='button'])$/.test(element.tagName.toLowerCase())) {
+                if (element.hasAttribute('href') || !element.hasAttribute('disabled')) {
+                    return true;
+                }
+            }
 
+            // Check for tabindex attribute. If it's >= 0, the element is focusable
+            const tabIndex = element.getAttribute('tabindex');
+            if (tabIndex !== null && tabIndex >= 0) {
+                return true;
+            }
+
+            return false;
+        }
 
         window.onload = function () {
             // Initialize with "updated just now"
@@ -151,8 +178,7 @@
         }
     </script>
 </head>
-<body onclick='document.activeElement.blur();'>
-    {% set is_ok_screen = (user.groups or user.friends) and (current_time - user.last_seen).total_seconds() >= 300 %}
+<body onclick='if (!canAcceptFocus(event.srcElement)) document.activeElement.blur();'>
     <input type="text" id="copyText" value="" style="display: none;">
     <div class="container">
         <div class="groups">
@@ -201,21 +227,27 @@
                 </div>
             {% elif selected_group and selected_group not in user.groups %}
                 <!-- Approve group add -->
-                <h1> {% if selected_friend %} {{selected_friend | repr }} 
-                     {% else %} {{ selected_group.owner | repr }} 
-                     {%endif%} רוצה לצרף אותך לקבוצה {{ selected_group.name or 'ללא שם'}}
-                </h1>
-                <h1> האם לאשר הצטרפות? </h1>
-                <button onclick='document.location.href = "/group/add?id={{selected_group.id}}"'>כן</button>
-                <button onclick='document.location.href = document.location.pathname'>לא</button>
-
+                <div>
+                    <div class=invite_subtitle> {% if selected_friend %} {{selected_friend | userToString }} 
+                         {% else %} {{ selected_group.owner | userToString }} 
+                         {%endif%} רוצה לצרף אותך לקבוצה {{ selected_group.name or 'ללא שם'}}
+                    </div>
+                    <h1 style='text-align:center;'> האם לאשר הצטרפות? </h1>
+                    <div class=center-buttons>
+                        <button onclick='document.location.href = "/group/add?id={{selected_group.id}}"'>כן</button>
+                        <button onclick='document.location.href = document.location.pathname'>לא</button>
+                    </div>
+                </div>
             {% elif selected_friend and selected_friend not in user.friends %}
                 <!-- Approve friend add -->
-                <h1> {{ selected_friend | repr }} רוצה להתחבר איתך כדי שתכולו לוודא ששניכם בסדר</h1>
-                <h1> האם לאשר חברות? </h1>
-                <button onclick='document.location.href = "/friend/add?id={{selected_friend.id}}"'>כן</button>
-                <button onclick='document.location.href = document.location.pathname'>לא</button>
-
+                <div>
+                    <div class=invite_subtitle> {{ selected_friend | userToString }} רוצה להתחבר איתך כדי שתכולו לוודא ששניכם בסדר</div>
+                    <h1 style='text-align:center;'> האם לאשר חברות? </h1>
+                    <div class=center-buttons>
+                        <button onclick='document.location.href = "/friend/add?id={{selected_friend.id}}"'>כן</button>
+                        <button onclick='document.location.href = document.location.pathname'>לא</button>
+                    </div>
+                </div>
             {%else%}
                 {% set maxEventTime = None %}
                 {% for group in user.groups %}
@@ -281,7 +313,7 @@
                                     {% for friend in group.users %}
                                         <div class=indent>
                                             <span class=status score="{{friend.get_status_score(timestamp=groupEventTimeStamp)}}" ></span>
-                                            <span class=user>{{ friend | repr}}</span>
+                                            <span class=user>{{ friend | userToString}}</span>
                                             <BR />
                                             <span class=last-seen is_ok={{friend.is_ok}}>{{ friend.last_seen | relativeDate}}</span>
                                         </div>
@@ -292,10 +324,21 @@
                     </div>
                 {% endfor %}
                 {% for friend in user.friends %}
-                    <div id='{{friend.id}}-friend'>
-                        <span class=status score="{{friend.get_status_score(timestamp=maxEventTime)}}" ></span>
-                        <span class=user>{{ friend | repr }}</span><br>
-                        <span class=last-seen is_ok={{friend.is_ok}}>{{ friend.last_seen | relativeDate}}</span>
+                    <div id='{{friend.id}}-friend' class=user-card>
+                        <div class=group-header>
+                            <span class=status score="{{friend.get_status_score(timestamp=maxEventTime)}}" ></span>
+                            <span class=user>{{ friend | userToString }}</span><br>
+                            <span class=menu onclick='event.stopPropagation()' tabindex=1>
+                                <nav>
+                                  <ul>
+                                    <li><div onclick="removeFriend('{{friend.id}}')">מחיקת חבר</div></li>
+                                  </ul>
+                                </nav>
+                            </span>
+                        </div>
+                        <div class=group-body>
+                            <span class=last-seen is_ok={{friend.is_ok}}>{{ friend.last_seen | relativeDate}}</span>
+                        </div>
                     </div>
                 {% endfor %}
 

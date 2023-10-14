@@ -6,7 +6,6 @@
 
     direction: rtl;
     text-align: right; /* Align text to the right */
-    text-align: justify; /* Justify text */
 }
 
 /* Style the body */
@@ -15,6 +14,30 @@ body {
     background-color: #f4f4f4;
     margin: 0;
     padding: 0;
+}
+
+.logo {
+    font-size:40px;
+    text-align:center;
+    margin-top:10px;
+}
+.application_name {
+    font-size:24px;
+    text-align:center;
+    font-weight: bold;
+    color:#007BFF;
+    margin-bottom:30px;
+}
+
+.invite {
+    font-size:24px;
+    text-align:center;
+    margin-bottom:30px;
+}
+.invite_subtitle {
+    font-size:20px;
+    text-align:center;
+    margin-bottom:30px;
 }
 
 /* Style the container */
@@ -34,6 +57,14 @@ h1 {
     color:#007BFF;
 }
 
+h2 {
+    font-size:24px;
+}
+
+h3 {
+    font-size:20px;
+    font-weight:normal;
+}
 /* Style the form */
 form {
     display: flex;
@@ -171,6 +202,14 @@ button:hover {
             transform: scale(1.05);
         }
 
+        .user-card {
+            transition: transform 0.2s ease;
+            z-index:1;
+        }
+        .user-card:hover {
+            transform: scale(1.05);
+        }
+
         .group-name {
             font-size: 24px;
             font-family: Arial, sans-serif;
@@ -187,17 +226,18 @@ button:hover {
 
         .status {
             font-size: 24px;
-            margin-bottom: 20px;
             position:relative; top:3px
         }
+
+        .
 
         .status[score='0']::before  { content: '🔴'; }
         .status[score='5']::before  { content: '🟡'; }
         .status[score='10']::before { content: '🟢'; }
-        .group-header .status {
+        .group-card .group-header .status {
             cursor: pointer;
         }
-        .group-header .status::after { 
+        .group-card .group-header .status::after { 
             border-style: solid;
             border-width: 5px 5px 0 0;
             border-color: #ffffffee;
@@ -211,7 +251,10 @@ button:hover {
             vertical-align: top;
             width: 6px;
         }
-        .group-card[collapsed='true'] .status::after {
+        .user-card .status{
+            margin-left:10px;
+        }
+        .group-card[collapsed='true'] .group-header .status::after {
             transform: rotate(135deg);
             top: 8px;
         }
@@ -245,7 +288,22 @@ button:hover {
         .last-seen::after  { content: ")"; }
         .last-seen::before { content: "("; }
         .last-seen[is_ok='True']::before  { content: "(👍"; filter: brightness(84%) hue-rotate(75deg) saturate(0%) sepia(0%);}
-        .last-seen[is_ok='False']::before { content: "(👎"; filter: brightness(64%) hue-rotate(290deg) saturate(96%) sepia(0%);            color: darkred;
+        .last-seen[is_ok='False']::before { content: "(👎"; filter: brightness(64%) hue-rotate(290deg) saturate(96%) sepia(0%);color: darkred;}
+
+
+.center-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center; /* This will center the text in your headings and buttons */
+}
+
+.center-buttons button {
+    margin: 10px; /* Optional: to provide some space between the buttons */
+    padding: 10px;
+    min-width:100px;
+    text-align:center;
+    font-size:24px;
 }
 
 /*        .group-card > div { position:absolute;}*/

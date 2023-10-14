@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="en">
-{% if group %}
-   {%if friend %}
-      {% set message = (friend | repr) + " הזמין אותך להצטרף לקבוצה '" + group.name + "' באפליקצית " %}
+{% if group and group.name %}
+   {%if friend and friend.name %}
+      {% set message = friend.name + " הזמין אותך להצטרף לקבוצה '" + group.name + "'" %}
    {%else%}
-      {% set message = "הזמינו אותך להצטרף לקבוצה '" + group.name + "' באפליקצית " %}
+      {% set message = "הזמינו אותך להצטרף לקבוצה '" + group.name + "'" %}
    {%endif%}
-{% elif friend %}
-   {% set message = (friend | repr) + " הזמין אותך להצטרף לאפליקצית " %}
+{% elif friend and friend.name %}
+   {% set message = friend.name + " רוצה להיות חבר שלך" %}
 {% else %}
-   {% set message = "ברוכים הבאים לאפליקצית " %}
+   {% set message = "ברוכים הבאים" %}
 {%endif%}
 <head>
     <meta charset="UTF-8">
@@ -17,38 +17,38 @@
     <link rel="stylesheet" href="static/css/styles.css">
     <title>login</title>
     <meta property="og:title" content="הכל בסדר">
-    <meta property="og:description" content="{{message}} יהיה בסדר ולוודא שהכל בסדר איתך בעת אירוע בטחוני!">
+    <meta property="og:description" content="{{message}} הכל בסדר ולוודא שהכל בסדר איתך בעת אירוע בטחוני!">
     <meta property="og:image" content="static/images/og_image.jpg">
 
 </head>
 <body>
     <div class="container">
       <div class="groups">
-         <div>
+        <div>
+         <div class=logo style=''>💬👌</div>
+         <div class=application_name>הכל בסדר</div>
       {%if not number_e164 %}
-         <br />
-         <h1 style='text-align:center'>💬👌</h1>
-         <h3>
-            {{ message }}<b>יהיה בסדר</b>
-         </h3>
-         <br />
-         <h3>בעת אירוע ביטחוני נכנסים,</h3>
-         <h3><span class=indent>מעדכנים שהכל בסדר,</span></h3>
-         <h3><span class=indent><span class=indent>ורואים מי בסדר ומי לא!</span></span></h3>
-         <br />
-         <br />
-        <h1>מה מספר הטלפון שלך?</h1>
+         <div class=invite>
+            {{ message }}
+         </div>
+         <div class=invite_subtitle>
+            בעת אירוע ביטחוני נכנסים,<br/>
+            מעדכנים שהכל בסדר,<br />
+            ורואים מי בסדר ומי לא.<br />
+         </div>
+        <h1 style='text-align:center;'>מה מספר הטלפון שלך?</h1>
         <form  method="POST">
             <input type="tel" id="phone_number" name="phone_number" value="{%if phone_number%}{{phone_number}}{%endif%}" placeholder="מספר טלפון" required enterkeyhint="send" style='direction:ltr'/>
             {% if phone_number %}
                <p style="color:red">מספר הטלפון שהקשת אינו תקין</p>
             {% endif %}
-            <br/>
-            <button type="submit">המשך</button>
+            <div class=center-buttons>
+               <button type="submit">המשך</button>
+            </div>
         </form>
 
       {%else%}
-        <h1>מה מספר האימות שקיבלת?</h1>
+        <h1 style='text-align:center;'>מה מספר האימות שקיבלת?</h1>
         <form method="POST">
             <div class="verification-code-container">
                 <input type="hidden" value="{%if phone_number%}{{phone_number}}{%endif%}" name="phone_number" id="phone_number" />
@@ -57,11 +57,13 @@
             {% if verification_code %}
                <p style="color:red">הקוד שהוקש אינו תקין</p>
             {% endif %}
-            <br />
-
-            <button type="submit">המשך</button>
+            <div class=center-buttons>
+               <button type="submit">המשך</button>
+            </div>
         </form>
       {%endif%}
+
+      <br />
    </div>
       </div>
     </div>

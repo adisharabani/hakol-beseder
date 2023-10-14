@@ -38,7 +38,7 @@ def myRedirect(endpoint, query=None):
         return redirect(url)
 
 @app.template_filter()
-def repr(user):
+def userToString(user):
     if user.name is None:
         return user.phone_number
     else:
@@ -89,7 +89,7 @@ def fromRelativeDate(last_seen):
 
 @app.before_request
 def enforce_https_and_naked_domain():
-    if request.url.startswith("http://127") and not request.url.startswith("http://imac"):
+    if request.url.startswith("http://127") or request.url.startswith("http://imac"):
         return
 
     # Check for "www" and redirect to naked domain
@@ -134,12 +134,12 @@ def to_e164(number):
     return None
 
 @app.route('/login', methods=["GET","POST"])
-def login(pending_group_id = None, pending_friend_id = None):
+def login():
     phone_number = request.form.get("phone_number")
     verification_code = request.form.get("verification_code")
 
-    pending_group_id = request.args.get("pending_group_id",pending_group_id)
-    pending_friend_id = request.args.get("pending_friend_id",pending_friend_id)
+    group_id = request.args.get("group_id")
+    friend_id = request.args.get("friend_id")
 
     number_e164 = to_e164(phone_number)
 
@@ -157,23 +157,19 @@ def login(pending_group_id = None, pending_friend_id = None):
 
     elif verification_code and \
         verification_code == session.get("verification-code") and \
-        number_e164 == session.get("number-e164"):
+        number_e164 == session.get("number-e164"):# or (phone_number=="#" and verification_code):
         #authenticate
         createUser(phone_number)
 
-        del session["verification-code"]
-        del session["number-e164"]
+        if "verification-code" in session:
+            del session["verification-code"]
+        if "number-e164" in session:
+            del session["number-e164"]
 
-        #show group if this came from a group invite
-        if pending_friend_id:
-            return myRedirect("addFriend", f"id={pending_friend_id}")
-        elif pending_group_id:
-            return myRedirect("addGroup", f"id={pending_group_id}")
-        else:
-            return myRedirect("main")
+        return myRedirect("main", request.query_string.decode("utf-8"))
 
-    group = db.session.query(Group).filter_by(id=pending_group_id).first() if pending_group_id else None
-    friend = db.session.query(User).filter_by(id=pending_friend_id).first() if pending_friend_id else None
+    group = db.session.query(Group).filter_by(id=group_id).first() if group_id else None
+    friend = db.session.query(User).filter_by(id=friend_id).first() if friend_id else None
 
     return render_template("login.html", phone_number=phone_number, verification_code = verification_code, number_e164=number_e164,
                             group = group, friend = friend)
@@ -187,10 +183,10 @@ def main():
 
     user = getCurrentUser()
     if user is None: 
-        if group_id and friend_id: return myRedirect("login", f"pending_group_id={group_id}&pending_friend_id={friend_id}")
-        if group_id: return myRedirect("login", f"pending_group_id={group_id}")
-        if friend_id: return myRedirect("login", f"pending_friend_id={friend_id}")
-        return myRedirect("login")
+        # if group_id and friend_id: return myRedirect("login", f"pending_group_id={group_id}&pending_friend_id={friend_id}")
+        # if group_id: return myRedirect("login", f"pending_group_id={group_id}")
+        # if friend_id: return myRedirect("login", f"pending_friend_id={friend_id}")
+        return myRedirect("login", request.query_string.decode("utf-8"))
 
     if request.form.get("status"): #TODO: WHAT IS THIS?
         print(request.form.get("status"))
@@ -199,15 +195,16 @@ def main():
     group = db.session.query(Group).filter_by(id=group_id).first() if group_id else None
     friend = db.session.query(User).filter_by(id=friend_id).first() if friend_id else None
 
+    #remove unecesary query
     if group and group in user.groups or \
         friend and friend in user.friends and not group:
         return myRedirect("main")
-
 
     # show_is_ok = session.get("show_is_ok") or (user.groups or user.friends) and (datetime.utcnow() - user.last_seen).total_seconds() >= 300
     show_is_ok = session.get("show_is_ok") or (datetime.utcnow() - user.last_seen).total_seconds() >= 300
     #TODO: Add group invite screen
     session["show_is_ok"] = False
+
     return render_template("main.html", 
                             user=user, selected_group=group, selected_friend=friend,
                             show_is_ok = show_is_ok,
@@ -227,7 +224,7 @@ def addGroup():
 
     user = getCurrentUser()
     if user is None:
-        return myRedirect("login", f"pending_group_id={group_id}")
+        return myRedirect("login", f"group_id={group_id}")
 
     if group_id:
         group = db.session.query(Group).filter_by(id=group_id).first()
@@ -303,7 +300,7 @@ def addFriend():
 
     user = getCurrentUser()
     if user is None: 
-        return myRedirect("login", f"pending_friend_id={friend_id}")
+        return myRedirect("login", f"friend_id={friend_id}")
 
     if friend_id: 
         friend = db.session.query(User).filter_by(id=friend_id).first()
@@ -311,23 +308,45 @@ def addFriend():
             user.add_friend(friend)
             db.session.add(user)
             db.session.commit()
-            print("Friend added")
+            # print("Friend added")
         else:
-            print("Friend not found")
+            # print("Friend not found")
     return myRedirect("main")
 
+@app.route("/friend/remove", methods=["GET","POST"])
+def removeFriend():
+    friend_id = request.json.get("id")
+    user = getCurrentUser()
+    if user is None: 
+        return myRedirect("login")
 
-@app.route("/recreateDB")
-def recreateDB():
-    db.drop_all()
-    db.create_all()
-    return "OK"
+    if friend_id: 
+        friend = db.session.query(User).filter_by(id=friend_id).first()
+        if friend:
+            if user in friend.my_friends:
+                friend.my_friends.remove(user)
+                db.session.add(friend)
+            if friend in user.my_friends:
+                user.my_friends.remove(friend)
+                db.session.add(user)
+            db.session.commit()
+            return "OK"
+        else:
+            return "Friend not found"
+    return "invalid input"
 
-@app.route("/createdb")
-def createDB():
-    # with app.app_context():
-    db.create_all()
-    return "OK"
+
+# @app.route("/recreateDB")
+# def recreateDB():
+#     db.drop_all()
+#     db.create_all()
+#     return "OK"
+
+# @app.route("/createdb")
+# def createDB():
+#     # with app.app_context():
+#     db.create_all()
+#     return "OK"
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", port=3001)
