@@ -310,6 +310,7 @@ def addFriend():
             db.session.commit()
             # print("Friend added")
         else:
+            pass
             # print("Friend not found")
     return myRedirect("main")
 

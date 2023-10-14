@@ -303,10 +303,11 @@
                                 </H3>
                                 {%endif%}
                             </div>
+                            {% if tc > 1 %}
                             <div showIf="collapsed"> 
-                                <br />
                                 <p style='color:gray'>לחצו כדי לראות פירוט של החברים</p>
                             </div>
+                            {% endif %}
                             <div showIf="expanded">
                                 {% if group.users|length > 1 %} 
                                  
