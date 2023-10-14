@@ -256,10 +256,31 @@ button:hover {
             transform: rotate(135deg);
             top: 8px;
         }
-        [collapsed='false'] [showIf='collapsed'],
-        [collapsed='true'] [showIf='expanded'] {
-            display:none;
+        [collapsed='true'] [showIf='collapsed']{
+            transition: max-height 0.1s 0.1s ease-in-out, adisplay 5s 2s ease-in-out; /* expanding */
+            overflow:scroll;
+            max-height: 100px;
+
         }
+
+        [collapsed='false'] [showIf='collapsed'] {
+            transition: max-height 0.1s  ease-in-out, adisplay 5s ease-in-out; /* collapsing */
+            max-height: 0; 
+            overflow:hidden; 
+        }
+
+        [collapsed='false'] [showIf='expanded']{
+            transition: max-height 1s ease-in-out, adisplay 5s 2s ease-in-out; /* expanding */
+            max-height: 1000px;
+            overflow:scroll;
+        }
+
+        [collapsed='true'] [showIf='expanded'] {
+            transition: max-height 0.1s ease-in-out, adisplay 0.5s ease-in-out; /* collapsing */
+            max-height: 0; 
+            overflow:hidden;
+        }
+
         .indent {
             padding-right:20px;
         }

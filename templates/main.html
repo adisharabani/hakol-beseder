@@ -186,7 +186,7 @@
             <div class=group-card>
                 <div class=group-header>
                     <span class=group-name>הי&nbsp;</span>
-                    <input type="text" id="name" class=group-name value="{{ user.name or '' }}" placeholder="עדכן את שמך" onchange="updateUserName(this.value)" onblur="if (this.value) {this.setAttribute('readonly','');}" {%if user.name %}readonly{%endif%}/>
+                    <input type="text" id="name" class=group-name value="{{ user.name or '' }}" placeholder="עדכן את שמך" onchange="updateUserName(this.value)" onblur="if (this.value && this.getAttribute('readonly')==null) {this.setAttribute('readonly','');}" {%if user.name %}readonly{%endif%}/>
                     {% if not show_is_ok %}
                     <span class=menu onclick='event.stopPropagation()' tabindex=1>
                         <nav>
@@ -263,7 +263,7 @@
                     <div class="group-card" id="{{ group.id }}-card" collapsed='true' onclick="if (this.getAttribute('collapsed')=='true') toggleGroupDetails('{{ group.id }}')">
                         <div class=group-header onclick="toggleGroupDetails('{{ group.id }}'); event.stopPropagation();">
                             <span class=status score="{{groupScore}}"></span>
-                            <input type="text" class=group-name placeholder="עדכן את שם הקבוצה" onchange="updateGroupName('{{group.id}}', this.value)" onblur="if (this.value) {this.setAttribute('readonly','');}" value="{{ group.name or '' }}"  {%if group.name %}readonly{%endif%} />
+                            <input type="text" class=group-name placeholder="עדכן את שם הקבוצה" onchange="updateGroupName('{{group.id}}', this.value)" onblur="if (this.value && this.getAttribute('readonly')==null) {this.setAttribute('readonly','');}" value="{{ group.name or '' }}"  {%if group.name %}readonly{%endif%} />
                             <span class=menu onclick='event.stopPropagation()' tabindex=1>
                                 <nav>
                                   <ul>
