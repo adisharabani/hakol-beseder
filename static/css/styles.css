@@ -229,8 +229,6 @@ button:hover {
             position:relative; top:3px
         }
 
-        .
-
         .status[score='0']::before  { content: '🔴'; }
         .status[score='5']::before  { content: '🟡'; }
         .status[score='10']::before { content: '🟢'; }
