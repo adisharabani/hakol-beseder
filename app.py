@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, session, redirect, url_for
-from myApp import app,twilio_sid, twilio_auth, twilio_number
+from myApp import app,twilio_sid, twilio_auth, twilio_number,gpt_engine, gpt_api_key
 
 from twilio.rest import Client
 import random
@@ -9,6 +9,8 @@ from datetime import datetime, timedelta
 
 import logging
 import phonenumbers
+import openai
+import re
 
 
 def getCurrentUser():
@@ -47,6 +49,8 @@ def userToString(user):
 
 @app.template_filter()
 def relativeDate(last_seen):
+    if last_seen == datetime.min:
+        return "עדיין לא התחבר/ה"
     now = datetime.utcnow()  # Assuming last_seen is in UTC time
     time_difference = now - last_seen
 
@@ -231,6 +235,90 @@ def main():
                             user=user, selected_group=group, selected_friend=friend,
                             show_is_ok = show_is_ok,
                             current_time = datetime.utcnow(), min_datetime=datetime.min)
+
+@app.route('/analyzeContacts', methods=['POST'])
+def analyzeContacts():
+    # contacts = request.form.get("contacts")
+    # print(contacts)
+    # if contacts:
+    #     show_is_ok = False
+    #     if contactsValid(contacts):
+    #         contactsImport(contacts)
+    #     else:
+    #         contacts = contactsAnalyze(contacts)
+    #         print("EDIT")
+    #         print(contacts)
+    #         print("DONE")
+    try:
+        contacts = request.data.decode('utf-8')
+        if not contacts.strip():
+            return contacts
+        # response = openai.Completion.create(
+        #     engine=gpt_engine,  # You can choose the appropriate engine
+        #     prompt="extract the all phone numbers from the following text and put each in a separate line. Convert phone number to e164 format (some might be in Israel local format). If there is a name next to the number put the name in the line of the number with one comma between the number and the name. Do your best effort, but only respond with this format:\n\n" + contacts,
+        #     max_tokens=1000,  # Adjust max tokens as needed
+        #     api_key=gpt_api_key
+        # )
+        # print(response)
+        # return response.choices[0].text.strip()
+        openai.api_key = gpt_api_key
+        response = openai.ChatCompletion.create( 
+            model="gpt-3.5-turbo-0613", 
+            messages=[{"role":"system","content":"You will receive a text and required to extract the all phone numbers and put each in a separate line. Convert phone number to e164 format (some might be in Israel local format). If there is a name next to the number put the name in the line of the number with one comma between the number and the name. Do your best effort"},
+                      {"role":"user", "content":contacts}], 
+            max_tokens = 2000, 
+            temperature=0) 
+        # print(response)
+        return response.choices[0].message.content
+    except Exception as e:
+        return str(e), 400
+
+pattern = r'^\+\d{1,15},\s*.*$'
+def contactsValid(contacts):
+    lines = contacts.split('\n')
+    for line in lines:
+        if not re.match(pattern, line):
+            return False
+    return True
+
+@app.route("/group/import", methods=["POST"])
+def contactsImport():
+    user = getCurrentUser()
+    contacts = request.form.get("contacts")
+    groupId = request.form.get("group_id")
+
+    if user is None or groupId is None:
+        return myRedirect("login")
+
+    group = db.session.query(Group).filter_by(id=groupId).first()
+    if group is None:
+        print("group not found")
+        return myRedirect("login")
+
+    if user not in group.users:
+        print("Bad User")
+        return myRedirect("main")
+    users = []
+    for line in contacts.split("\n"):
+        s = contacts.split(",")
+        phone_number,name = to_e164(s[0]), ",".join(s[1:]).strip()
+        # check if user exists
+        if phone_number:
+            u = User.query.filter_by(phone_number=phone_number).first()
+            if not u:
+                u = User(phone_number = phone_number, name = name or None)
+            users.append(u)
+        # create user
+        # add to group
+    if users:
+        for u in users:
+            db.session.add(u)
+            if u not in group.users:
+                group.users.append(u)
+        db.session.add(group)
+        db.session.commit()
+
+    return myRedirect("main")
 
 @app.route('/is_ok')
 def is_ok():

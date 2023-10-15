@@ -22,5 +22,5 @@ twilio_sid = os.environ.get("TWILIO_SID")
 twilio_auth = os.environ.get("TWILIO_AUTH")
 twilio_number = os.environ.get("TWILIO_NUMBER")
 
-
-
+gpt_api_key = os.environ.get("GPT_API_KEY")
+gpt_engine = os.environ.get("GPT_ENGINE")

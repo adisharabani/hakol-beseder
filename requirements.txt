@@ -7,4 +7,4 @@ gunicorn
 twilio
 phonenumbers
 Flask-Migrate
-
+openai

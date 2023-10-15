@@ -61,7 +61,10 @@ class User(db.Model):
             self.my_friends.append(friend)
 
     def get_status_score(self, timestamp):
-        if self.is_ok and (timestamp == None or (self.last_seen + timedelta(minutes=1) >= timestamp)): 
+        print (self.last_seen, datetime.min)
+        if self.last_seen == datetime.min:
+            return -1
+        elif self.is_ok and (timestamp == None or (self.last_seen + timedelta(minutes=1) >= timestamp)): 
             return 10
         elif self.is_ok:
             return 5
@@ -87,14 +90,14 @@ class Group(db.Model):
 
     def get_last_event_time(self):
         # Extract last_seen timestamps of all users in the group
-        ts = [user.last_seen for user in self.users]
+        ts = [user.last_seen for user in self.users if user.last_seen != datetime.min]
         if not ts: return datetime.min
         ts.sort(reverse=True)
         return next((ts[i] for i in range(len(ts) - 1) if ts[i] - ts[i + 1] > timedelta(minutes=10)), min(ts))
 
     def get_status_score(self):
         timestamp = self.get_last_event_time()
-        return min([u.get_status_score(timestamp=timestamp) for u in self.users])
+        return min([u.get_status_score(timestamp=timestamp) for u in self.users if u.last_seen != datetime.min])
 
     def count_score(self,score):
         timestamp = self.get_last_event_time()

@@ -174,22 +174,52 @@
             return false;
         }
 
-        function showImportOverlay() {
-            document.getElementById("overlay").removeAttribute("hide");
+        function importContacts(groupId) {
+            document.getElementById("contactsGroupId").value = groupId;
+            document.getElementById("contactsTextarea").value = ""
+            document.getElementById("contactsTextarea").removeAttribute("readonly")
+            document.getElementById("contactsDiv").removeAttribute("analyzed");
+            document.getElementById("contactsDiv").removeAttribute("spinner");
+            document.getElementById("contactsDiv").removeAttribute("hide");
         }
+        async function analyzeContacts() {
+            // Disable the textarea
+            const textarea = document.getElementById("contactsTextarea");
+            textarea.setAttribute("readonly", true);
 
-        function hideImportOverlay() {
-            document.getElementById("overlay").setAttribute("hide","");
-        }
+            // Display a loading spinner
+            document.getElementById("contactsDiv").setAttribute("spinner","");
+            try {
+                // Get the textarea content
+                const contacts = textarea.value;
 
-        function importContacts() {
-            const textValue = document.getElementById("overlayTextarea").value;
-            
-            // You can create and submit a form request here
-            // For demonstration, I'm just logging the textarea value
-            console.log(textValue);
-            
-            hideImportOverlay();
+                // Send a POST request to your "/analyzeContacts" API endpoint with plain text content
+                const response = await fetch("/analyzeContacts", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "text/plain", // Change the content type to text/plain
+                    },
+                    body: contacts, // Use the textarea content directly
+                });
+
+                if (response.ok) {
+                    // If the request is successful, update the textarea with the response
+                    const responseBody = await response.text();
+                    textarea.removeAttribute("readonly");
+                    textarea.value = responseBody;
+                } else {
+                    // Handle the case when the API request fails
+                    alert("An error occurred while analyzing contacts.");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("An error occurred while analyzing contacts.");
+            } finally {
+                // Remove the loading spinner and enable the textarea
+                document.getElementById("contactsDiv").removeAttribute("spinner");
+                document.getElementById("contactsDiv").setAttribute("analyzed","");
+                textarea.removeAttribute("readonly");
+            }
         }
 
 
@@ -220,7 +250,6 @@
                             <li><div onclick="addFriend()">הוספת חבר</div></li>
                             <li><div onclick="document.location.href = 'group/add'">יצירת קבוצה</div></li>
                             <hr />
-                            <li><div onclick="showImportOverlay()">יבוא משתמשים</div></li>
                             <li><div onclick="shareApp()">ספר לאחרים</div></li>
                           </ul>
                         </nav>
@@ -291,22 +320,15 @@
                             <span class=menu onclick='event.stopPropagation()' tabindex=1>
                                 <nav>
                                   <ul>
-                                    <li>
-                                      <div onclick="shareGroup('{{ group.id }}')">
-                                        הוספת אנשים
-                                      </div>
-                                    </li>
-                                    <li>
-                                      <div onclick="changeGroupName('{{ group.id }}')">
-                                        שינוי שם
-                                      </div>
-                                    </li> <li>
-                                      <div onclick="leaveGroup('{{ group.id }}')">
+                                    <li><div onclick="changeGroupName('{{ group.id }}')">שינוי שם</div></li>
+                                    <li><div onclick="shareGroup('{{ group.id }}')">הוספת אנשים</div></li>
+                                    <hr />
+                                    <li><div onclick="importContacts('{{group.id}}')">ייבוא מרשימה</div></li>
+                                    <li><div onclick="leaveGroup('{{ group.id }}')">
                                         {% if tc == 1 %}מחיקת הקבוצה
                                         {%else%}יציאה מהקבוצה
                                         {%endif%}
-                                      </div>
-                                    </li>
+                                    </div></li>
                                   </ul>
                                 </nav>
                             </span>
@@ -377,15 +399,19 @@
         </div>
     </div>
 
-    <div id="overlay" class="overlay" hide>
-        <div class="overlay-content">
-            <div id="overlayText"></div>
-            <textarea id="overlayTextarea" placeholder="אני עובד על הפיצ׳ר הזה... בקרוב..." g="העתק לכאן רשימה עם מספרי טלפון - לא נורא אם יש שמות או פסיקים או רווחים. אנחנו נתמודד"></textarea>
-            <div class=center-buttons>
-                <button onclick="importContacts()">יבוא אנשי קשר</button>
-                <button onclick="hideImportOverlay()">ביטול</button>
-            </div>
+   <div id="contactsDiv" class="contacts" {%if not contacts%}hide{%endif%}>
+        <div class="contacts-content">
+            <form action="/group/import" method="post">
+                <input type="hidden" id="contactsGroupId" name="group_id" />
+                <textarea id="contactsTextarea" name="contacts" placeholder="העתק לכאן רשימה עם מספרי טלפון - לא נורא אם יש שמות או פסיקים או רווחים. אנחנו נתמודד">{% if contacts %}{{contacts}}{%endif%}</textarea>
+                <div class="center-buttons">
+                    <button type="submit">ייבוא</button>
+                    <button type="button" onclick="analyzeContacts();event.stopPropagation()">נתח טלפונים</button>
+                    <button type="button" onclick="document.getElementById('contactsDiv').setAttribute('hide','');">ביטול</button>
+                </div>
+            </form>
         </div>
+        <div class="spinner"></div>
     </div>
 
 
