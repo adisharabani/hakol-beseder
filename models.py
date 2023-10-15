@@ -13,6 +13,11 @@ import os
 import statistics
 from flask_migrate import Migrate
 
+#flask db migrate -m "Updated phone_number length"
+#flask db upgrade
+#git push
+#heroku run flask db upgrade
+
  
 # Configure the SQLite database
 # dbname = "mydatabase.db"

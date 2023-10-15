@@ -145,9 +145,13 @@
             if (minutesPassed === 1) {
                 updated.textContent = "עודכן לפני דקה";
                 updated2.textContent = "עודכן לפני דקה";
-            } else if (minutesPassed > 1) {
+            } else if (minutesPassed >= 2) {
                 updated.textContent = "עודכן לפני " + minutesPassed + " דקות";
                 updated2.textContent = "עודכן לפני " + minutesPassed + " דקות";
+                updated.style.color = "red";
+            }
+            if (minutesPassed >= 3) {
+                updated.style.animation = "blink 1s infinite";
             }
 
             updated.onclick = function() {document.location.reload() }
