@@ -15,7 +15,7 @@ import re
 
 def getCurrentUser():
     if "user-id" in session:
-        return User.query.get(str(session["user-id"]))
+        return User.query.get(str(session.get("user-id")))
     return None
 
 def createUser(phone_number):
@@ -263,7 +263,7 @@ def analyzeContacts():
         # return response.choices[0].text.strip()
         openai.api_key = gpt_api_key
         response = openai.ChatCompletion.create( 
-            model="gpt-3.5-turbo-0613", 
+            model=gpt_engine, 
             messages=[{"role":"system","content":"You will receive a text and required to extract the all phone numbers and put each in a separate line. Convert phone number to e164 format (some might be in Israel local format). If there is a name next to the number put the name in the line of the number with one comma between the number and the name. Do your best effort"},
                       {"role":"user", "content":contacts}], 
             max_tokens = 2000, 

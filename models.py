@@ -61,7 +61,6 @@ class User(db.Model):
             self.my_friends.append(friend)
 
     def get_status_score(self, timestamp):
-        print (self.last_seen, datetime.min)
         if self.last_seen == datetime.min:
             return -1
         elif self.is_ok and (timestamp == None or (self.last_seen + timedelta(minutes=1) >= timestamp)): 
