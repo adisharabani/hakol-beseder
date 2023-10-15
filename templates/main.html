@@ -4,8 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="static/css/styles.css">
+    <link rel="apple-touch-icon" href="static/images/og_image.jpg">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
-    <title>סטטוס חברים</title>
+    <title>הכל בסדר</title>
 
     <script>
         function socialShare(message) {
@@ -230,11 +233,64 @@
             // Set interval to update text every minute (60,000 milliseconds)
             setInterval(updateText, 60*1000);
         }
+        let deferredPrompt;
+
+        {% if user.phone_number == "+972544218000" %} 
+        window.addEventListener('beforeinstallprompt', (e) => {
+          e.preventDefault();
+          deferredPrompt = e;
+          showAddToHomePrompt();
+        });
+
+        function showAddToHomePrompt() {
+  const promptUI = document.createElement('div');
+  promptUI.id = 'addToHomePrompt';
+  promptUI.style.zIndex = '9999';
+  promptUI.style.position = 'fixed';
+  promptUI.style.top = '0';
+  promptUI.style.left = '0';
+  promptUI.style.width = '100%';
+  promptUI.style.height = '100%';
+  promptUI.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+  promptUI.style.display = 'flex';
+  promptUI.style.justifyContent = 'center';
+  promptUI.style.alignItems = 'center';
+  promptUI.innerHTML = `
+    <div style="background-color: white; padding: 20px; border-radius: 10px;">
+      <p>האם תרצה לשמור את האפליקציה כדי שתהיה יותר נוחה לשימוש?</p>
+      <button id="addToHomeYes">כן, הוסף למסך הבית</button>
+      <button id="addToHomeNo">לא תודה</button>
+    </div>
+  `;
+
+  document.body.appendChild(promptUI);
+
+  document.getElementById('addToHomeYes').addEventListener('click', () => {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the A2HS prompt');
+      } else {
+        console.log('User dismissed the A2HS prompt');
+      }
+      deferredPrompt = null;
+      document.body.removeChild(promptUI);
+    });
+  });
+
+  document.getElementById('addToHomeNo').addEventListener('click', () => {
+    deferredPrompt = null;
+    document.body.removeChild(promptUI);
+  });
+}
+        {%endif%}
+
+
     </script>
 </head>
-<body onclick='if (!canAcceptFocus(event.srcElement)) document.activeElement.blur();'>
+<body onclick='if (!canAcceptFocus(event.srcElement)) document.activeElement.blur();' >
     <input type="text" id="copyText" value="" style="display: none;">
-    <div class="container">
+    <div class="container" {%if isAdmin %}style='background-color:black'{%endif%}>
         <div class="groups">
             <div class=group-card>
                 <div class=group-header>
@@ -304,7 +360,7 @@
                 </div>
             {%else%}
                 {% set maxEventTime = None %}
-                {% for group in user.groups %}
+                {% for group in groups %}
                     {% set groupScore = group.get_status_score() %}
                     {% set groupEventTimeStamp = group.get_last_event_time() %}
                     {% set gc = group.count_score(10) %}
@@ -371,7 +427,7 @@
                         </div>
                     </div>
                 {% endfor %}
-                {% for friend in user.friends %}
+                {% for friend in friends %}
                     <div id='{{friend.id}}-friend' class=user-card>
                         <div class=group-header>
                             <span class=status score="{{friend.get_status_score(timestamp=maxEventTime)}}" ></span>

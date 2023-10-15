@@ -231,10 +231,13 @@ def main():
     #TODO: Add group invite screen
     session["show_is_ok"] = False
 
+    isAdmin = "admin" in request.args and user.phone_number == "+972544218000"
     return render_template("main.html", 
                             user=user, selected_group=group, selected_friend=friend,
-                            show_is_ok = show_is_ok,
-                            current_time = datetime.utcnow(), min_datetime=datetime.min)
+                            show_is_ok = show_is_ok, 
+                                groups = user.groups if not isAdmin else Group.query.all(),
+                                friends = user.friends if not isAdmin else User.query.all(),
+                            isAdmin = isAdmin)
 
 @app.route('/analyzeContacts', methods=['POST'])
 def analyzeContacts():
@@ -300,8 +303,9 @@ def contactsImport():
         return myRedirect("main")
     users = []
     for line in contacts.split("\n"):
-        s = contacts.split(",")
+        s = line.split(",")
         phone_number,name = to_e164(s[0]), ",".join(s[1:]).strip()
+        print (f"Trying to add {phone_number}, {name} ")
         # check if user exists
         if phone_number:
             u = User.query.filter_by(phone_number=phone_number).first()
