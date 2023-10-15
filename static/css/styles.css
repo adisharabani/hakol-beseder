@@ -387,3 +387,47 @@ button:hover {
 }
 
 
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.7); /* Darken the background */
+    z-index: 9999; /* Sit on top */
+    transition: zoom 0.5s ease-in-out, opacity 0.5s ease-in-out;
+}
+
+.overlay-content {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    text-align: center;
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+}
+#overlayTextarea {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    bottom: 80px;
+    font-size: 24px;
+}
+.overlay .center-buttons {
+    position: absolute;
+    left: 10px;
+    right: 10px;
+    bottom: 0px;
+}
+.overlay[hide] {
+    display:none;
+    zoom:0;
+    opacity:0;
+}
+
+
