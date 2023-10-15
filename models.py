@@ -11,7 +11,9 @@ from datetime import datetime, timedelta
 import uuid
 import os
 import statistics
+from flask_migrate import Migrate
 
+ 
 # Configure the SQLite database
 # dbname = "mydatabase.db"
 # should_create = "RECREATE_DB" in os.environ
@@ -19,6 +21,7 @@ import statistics
 #app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{dbname}'
 
 db = SQLAlchemy(app)
+migrate = Migrate(app, db)
 
 class Friendship(db.Model):
     user_id = db.Column(db.String(36), db.ForeignKey('user.id'), primary_key=True)

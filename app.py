@@ -8,7 +8,8 @@ from models import *
 from datetime import datetime, timedelta
 
 import logging
- 
+import phonenumbers
+
 
 def getCurrentUser():
     if "user-id" in session:
@@ -40,9 +41,9 @@ def myRedirect(endpoint, query=None):
 @app.template_filter()
 def userToString(user):
     if user.name is None:
-        return user.phone_number
+        return from_e164(user.phone_number)
     else:
-        return f"{user.name} ({user.phone_number})"
+        return f"{user.name} ({from_e164(user.phone_number)})"
 
 @app.template_filter()
 def relativeDate(last_seen):
@@ -133,6 +134,22 @@ def to_e164(number):
             return "+972"+number[1:]
     return None
 
+def from_e164(e164_number):
+    try:
+        # Parse the number without specifying a region (letting it infer the region from the number)
+        number = phonenumbers.parse(e164_number)
+        # Check if the parsed number is valid
+        if not phonenumbers.is_valid_number(number):
+            return e164_number
+        # If it's an Israeli number, format it in the national format
+        if number.country_code == 972:  # 972 is the country code for Israel
+            return phonenumbers.format_number(number, phonenumbers.PhoneNumberFormat.NATIONAL)
+        # If it's not an Israeli number, format it in the international format but with dashes
+        return phonenumbers.format_number(number, phonenumbers.PhoneNumberFormat.INTERNATIONAL)
+    except phonenumbers.NumberParseException:
+        return e164_number
+
+
 @app.route('/login', methods=["GET","POST"])
 def login():
     phone_number = request.form.get("phone_number")
@@ -159,7 +176,7 @@ def login():
         verification_code == session.get("verification-code") and \
         number_e164 == session.get("number-e164"):# or (phone_number=="#" and verification_code):
         #authenticate
-        createUser(phone_number)
+        createUser(number_e164)
 
         if "verification-code" in session:
             del session["verification-code"]

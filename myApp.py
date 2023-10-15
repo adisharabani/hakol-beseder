@@ -2,7 +2,6 @@ from flask import Flask
 from dotenv import load_dotenv 
 from datetime import timedelta
 
- 
 import logging
 import os
 
@@ -22,3 +21,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get("DATABASE_URL").replace("
 twilio_sid = os.environ.get("TWILIO_SID")
 twilio_auth = os.environ.get("TWILIO_AUTH")
 twilio_number = os.environ.get("TWILIO_NUMBER")
+
+
+
