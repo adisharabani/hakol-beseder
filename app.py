@@ -129,11 +129,11 @@ def logout():
 def to_e164(number):
     if not number:
         return None
-    number = number.replace("-","").replace(" ","")
-    if number.startswith("+"):
+    number = ''.join([char for char in number if char.isdigit() or char == '+'])
+    if number.startswith('+'):
         if len(number) >= 11 and len(number)<=16:
             return number
-    if number.startswith("0"):
+    if number.startswith('0'):
         if len(number) == 10 or (not number.startswith("05")) and len(number) == 9:
             return "+972"+number[1:]
     return None
@@ -163,6 +163,7 @@ def login():
     friend_id = request.args.get("friend_id")
 
     number_e164 = to_e164(phone_number)
+    print(repr(number_e164), repr(phone_number))
 
     if (number_e164 and not verification_code) or request.form.get("resend_verification_code"):
         #Invent Verification Code
