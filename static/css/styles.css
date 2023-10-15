@@ -304,10 +304,8 @@ button:hover {
         .last-seen[is_ok='False'] {
             color: darkred;
         }
-        .last-seen::after  { content: ")"; }
-        .last-seen::before { content: "("; }
-        .last-seen[is_ok='True']::before  { content: "(👍"; filter: brightness(84%) hue-rotate(75deg) saturate(0%) sepia(0%);}
-        .last-seen[is_ok='False']::before { content: "(👎"; filter: brightness(64%) hue-rotate(290deg) saturate(96%) sepia(0%);color: darkred;}
+        .last-seen[is_ok='True']::before  { content: "👍 "; filter: brightness(84%) hue-rotate(75deg) saturate(0%) sepia(0%);}
+        .last-seen[is_ok='False']::before { content: "👎 "; filter: brightness(64%) hue-rotate(290deg) saturate(96%) sepia(0%);color: darkred;}
 
 
 .center-buttons {

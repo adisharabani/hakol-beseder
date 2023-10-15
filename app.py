@@ -59,11 +59,13 @@ def relativeDate(last_seen):
         hours = time_difference.total_seconds() // 3600
         minutes = time_difference.total_seconds() // 60 - hours * 60
         return f"לפני {int(hours)} שעות ו-{int(minutes % 60)} דקות"
-    elif time_difference < timedelta(days=30):
-        days = time_difference.days
-        return f"לפני {days} ימים"
+    # elif time_difference < timedelta(days=30):
+    #     days = time_difference.days
+    #     if days==1:
+    #         return "אתמול"
+    #     return f"לפני {days} ימים"
     else:
-        return last_seen.strftime("%d/%m/%Y")
+        return last_seen.strftime("%d/%m/%Y %H:%M")
 
 
 @app.template_filter()
@@ -78,15 +80,17 @@ def fromRelativeDate(last_seen):
         if minutes == 1:
             return f"בדקה האחרונה"
         return f"ב-{minutes} הדקות האחרונות"
-    elif time_difference < timedelta(days=1):
+    elif time_difference < timedelta(hours=30):
         hours = int(time_difference.total_seconds() // 3600)
         minutes = int(time_difference.total_seconds() // 60 - hours * 60)
         return f"ב-{hours}:{minutes:02} השעות האחרונות"
     elif time_difference < timedelta(days=30):
         days = time_difference.days
-        return f"ב-{days} הימים האחרונים"
+        if days==1:
+            return f"ביומיים האחרונים"
+        return f"ב-{days+1} הימים האחרונים"
     else:
-        return "מאז " + last_seen.strftime("%d/%m/%Y")
+        return "מאז " + last_seen.strftime("%d/%m/%Y %H:%M")
 
 @app.before_request
 def enforce_https_and_naked_domain():

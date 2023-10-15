@@ -321,7 +321,7 @@
                                             <span class=status score="{{friend.get_status_score(timestamp=groupEventTimeStamp)}}" ></span>
                                             <span class=user>{{ friend | userToString}}</span>
                                             <BR />
-                                            <span class=last-seen is_ok={{friend.is_ok}}>{{ friend.last_seen | relativeDate}}</span>
+                                            <span class=last-seen is_ok={{friend.is_ok}}>({{ friend.last_seen | relativeDate}})</span>
                                         </div>
                                     {% endfor %}
                                 {%endif%}
@@ -343,7 +343,7 @@
                             </span>
                         </div>
                         <div class=group-body>
-                            <span class=last-seen is_ok={{friend.is_ok}}>{{ friend.last_seen | relativeDate}}</span>
+                            <span class=last-seen is_ok={{friend.is_ok}}>({{ friend.last_seen | relativeDate}})</span>
                         </div>
                     </div>
                 {% endfor %}
